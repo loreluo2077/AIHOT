@@ -11,8 +11,16 @@ export interface AihotAnswer<T> {
   etag: string | null;
 }
 
+export interface AihotTextAnswer {
+  html: string | null;
+  notModified: boolean;
+  etag: string | null;
+}
+
 export interface AihotClient {
   get<T>(path: string, query?: Record<string, string | number | null | undefined>, opts?: { etag?: string | null }): Promise<AihotAnswer<T>>;
+  /** One of AIHOT's own pages, as HTML. Same pacing, conditional requests and error rules as `get`. */
+  text(path: string, opts?: { etag?: string | null }): Promise<AihotTextAnswer>;
 }
 
 export class AihotHttpError extends Error {
@@ -48,37 +56,45 @@ const RETRYABLE = new Set([408, 425, 429, 500, 502, 503, 504]);
 export function httpClient(): AihotClient {
   return {
     async get<T>(path: string, query: Record<string, string | number | null | undefined> = {}, opts: { etag?: string | null } = {}): Promise<AihotAnswer<T>> {
-      const url = new URL(`${BRIDGE.baseUrl()}${path}`);
-      for (const [key, value] of Object.entries(query)) if (value !== null && value !== undefined && value !== "") url.searchParams.set(key, String(value));
-      const headers: Record<string, string> = { accept: "application/json", "user-agent": BRIDGE.userAgent() };
-      if (opts.etag) headers["if-none-match"] = opts.etag;
-
-      let attempt = 0;
-      for (;;) {
-        await throttle();
-        let response: Response;
-        try {
-          response = await fetch(url, { headers, signal: AbortSignal.timeout(30_000), redirect: "follow" });
-        } catch (error) {
-          if (attempt++ < 2) {
-            await new Promise((resolve) => setTimeout(resolve, 2_000 * attempt));
-            continue;
-          }
-          throw new AihotHttpError(0, `${path}: ${(error as Error).message}`);
-        }
-        if (response.status === 304) return { data: null, notModified: true, etag: response.headers.get("etag") ?? opts.etag ?? null };
-        if (response.ok) {
-          const data = (await response.json()) as T;
-          return { data, notModified: false, etag: response.headers.get("etag") };
-        }
-        const wait = retryAfterMs(response);
-        if (RETRYABLE.has(response.status) && attempt++ < 2) {
-          // Their rule: wait out a 429 rather than retry into it. Never longer than the interval they gave.
-          await new Promise((resolve) => setTimeout(resolve, Math.min(wait ?? 5_000 * attempt, 60_000)));
-          continue;
-        }
-        throw new AihotHttpError(response.status, `${path}: ${response.status} ${await response.text().catch(() => "")}`.slice(0, 500), wait);
-      }
+      const response = await request(path, query, opts, "application/json");
+      if (response.status === 304) return { data: null, notModified: true, etag: response.headers.get("etag") ?? opts.etag ?? null };
+      return { data: (await response.json()) as T, notModified: false, etag: response.headers.get("etag") };
+    },
+    async text(path: string, opts: { etag?: string | null } = {}): Promise<AihotTextAnswer> {
+      const response = await request(path, {}, opts, "text/html");
+      if (response.status === 304) return { html: null, notModified: true, etag: response.headers.get("etag") ?? opts.etag ?? null };
+      return { html: await response.text(), notModified: false, etag: response.headers.get("etag") };
     },
   };
+}
+
+/** One successful (or not modified) response. Errors and retries are decided here, once, for both entrances. */
+async function request(path: string, query: Record<string, string | number | null | undefined>, opts: { etag?: string | null }, accept: string): Promise<Response> {
+  const url = new URL(`${BRIDGE.baseUrl()}${path}`);
+  for (const [key, value] of Object.entries(query)) if (value !== null && value !== undefined && value !== "") url.searchParams.set(key, String(value));
+  const headers: Record<string, string> = { accept, "user-agent": BRIDGE.userAgent() };
+  if (opts.etag) headers["if-none-match"] = opts.etag;
+
+  let attempt = 0;
+  for (;;) {
+    await throttle();
+    let response: Response;
+    try {
+      response = await fetch(url, { headers, signal: AbortSignal.timeout(30_000), redirect: "follow" });
+    } catch (error) {
+      if (attempt++ < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 2_000 * attempt));
+        continue;
+      }
+      throw new AihotHttpError(0, `${path}: ${(error as Error).message}`);
+    }
+    if (response.status === 304 || response.ok) return response;
+    const wait = retryAfterMs(response);
+    if (RETRYABLE.has(response.status) && attempt++ < 2) {
+      // Their rule: wait out a 429 rather than retry into it. Never longer than the interval they gave.
+      await new Promise((resolve) => setTimeout(resolve, Math.min(wait ?? 5_000 * attempt, 60_000)));
+      continue;
+    }
+    throw new AihotHttpError(response.status, `${path}: ${response.status} ${await response.text().catch(() => "")}`.slice(0, 500), wait);
+  }
 }

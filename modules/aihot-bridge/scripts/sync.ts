@@ -1,9 +1,11 @@
 // Runs a sync now (development / operations helper). The switch is respected: without
 // AIHOT_BRIDGE_ENABLED=true nothing leaves the site unless --force is given.
-//   node --env-file=.env modules/aihot-bridge/scripts/sync.ts [items|changes|events|reports|all] [--force]
+//   node --env-file=.env modules/aihot-bridge/scripts/sync.ts [items|changes|events|reports|detail|all] [--force]
 import { closeDb } from "@aihot/backend/db";
+import { stopBoss } from "@aihot/backend/jobs/queue";
 import { BRIDGE } from "../config.ts";
 import { httpClient } from "../backend/client.ts";
+import { syncDetails } from "../backend/detail.ts";
 import { syncEvents } from "../backend/events.ts";
 import { syncAll, syncChanges, syncItems, syncReports } from "../backend/sync.ts";
 import { bridgeStatus } from "../backend/status.ts";
@@ -33,13 +35,19 @@ switch (what) {
   case "reports":
     summaries = [await syncReports(client)];
     break;
+  case "detail":
+    summaries = [await syncDetails(client)];
+    break;
   case "all":
     summaries = await syncAll(client);
     break;
   default:
-    console.error(`unknown feed: ${what} (expected items, changes, events, reports or all)`);
+    console.error(`unknown feed: ${what} (expected items, changes, events, reports, detail or all)`);
     process.exit(1);
 }
 
 console.log(JSON.stringify({ summaries, status: await bridgeStatus() }, null, 2));
+// Publishing starts the job queue lazily and enqueueing keeps the process alive on its own; the pool
+// closing is not enough to let the script end.
+await stopBoss();
 await closeDb();

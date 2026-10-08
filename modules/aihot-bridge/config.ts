@@ -17,6 +17,11 @@ export const BRIDGE = {
   /** Issues kept in sync per report kind, newest first. */
   reportHistory: { daily: 30, weekly: 12, monthly: 12 } as Record<string, number>,
   /**
+   * Item text: how many items one run fetches the body of. Each item is up to two requests (the source's
+   * own rendering and AIHOT's Chinese translation), so this also bounds one run's time on the wire.
+   */
+  detail: { maxPerRun: 60 },
+  /**
    * The hot list and the events behind it. Heat is this site's own rule (48 h, one per source), so the
    * ranking is recomputed here from the reports that actually reach the site; the top few of AIHOT's
    * list are what gets mirrored. `importMissingReports` brings the reports of an event the site does

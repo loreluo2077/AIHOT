@@ -5,6 +5,7 @@ import { BRIDGE } from "../config.ts";
 import { importItem, importReport, lookupFor, removeItem, dailyIssuesBetween } from "./import.ts";
 import { aihotIdFromUrl, dailyContent, periodContent, reportGeneratedAt, reportKey } from "./mapping.ts";
 import { readItems, readSync, saveRun, saveSync } from "./state.ts";
+import { syncDetails } from "./detail.ts";
 import { syncEvents } from "./events.ts";
 import type { AihotAnswer, AihotClient } from "./client.ts";
 import { countOutcome, emptySummary, type SyncSummary } from "./summary.ts";
@@ -208,5 +209,5 @@ export async function syncReports(client: AihotClient, db: Db = sql): Promise<Sy
 
 /** Everything the scheduled runs do, in one call (the CLI uses this). */
 export async function syncAll(client: AihotClient, db: Db = sql): Promise<SyncSummary[]> {
-  return [await syncItems(client, db), await syncChanges(client, db), await syncEvents(client, db), await syncReports(client, db)];
+  return [await syncItems(client, db), await syncChanges(client, db), await syncEvents(client, db), await syncReports(client, db), await syncDetails(client, db)];
 }

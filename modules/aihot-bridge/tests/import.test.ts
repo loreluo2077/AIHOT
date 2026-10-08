@@ -10,7 +10,7 @@ import { stopBoss } from "@aihot/backend/jobs/queue";
 import { dailyIssuesBetween, importItem, importReport, lookupFor, removeItem } from "../backend/import.ts";
 import { dailyContent, sourceIdFor } from "../backend/mapping.ts";
 import { syncChanges, syncItems, syncReports } from "../backend/sync.ts";
-import type { AihotAnswer, AihotClient } from "../backend/client.ts";
+import { AihotHttpError, type AihotAnswer, type AihotClient } from "../backend/client.ts";
 import type { AihotChanges, AihotDailyIndex, AihotDailyReport, AihotItem, AihotItemsPage, AihotPeriodIndex, AihotSnapshot } from "../backend/types.ts";
 
 const T = tag();
@@ -36,11 +36,16 @@ function item(overrides: Partial<AihotItem> = {}): AihotItem {
 }
 
 /** A client answering from memory, so the sync's own logic is what is under test. */
-function fakeClient(answer: (path: string, query: Record<string, unknown>) => unknown): AihotClient {
+function fakeClient(answer: (path: string, query: Record<string, unknown>) => unknown, pages: (path: string) => string | null = () => null): AihotClient {
   return {
     async get<T>(path: string, query: Record<string, string | number | null | undefined> = {}): Promise<AihotAnswer<T>> {
       const data = answer(path, query);
       return { data: (data ?? null) as T | null, notModified: false, etag: null };
+    },
+    async text(path: string) {
+      const html = pages(path);
+      if (html === null) throw new AihotHttpError(404, `${path}: 404`);
+      return { html, notModified: false, etag: null };
     },
   };
 }

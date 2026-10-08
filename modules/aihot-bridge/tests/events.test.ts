@@ -11,7 +11,7 @@ import { stopBoss } from "@aihot/backend/jobs/queue";
 import { latestHotRanking } from "@aihot/backend/publication/hot";
 import { loadStoryDetail } from "@aihot/backend/publication/stories";
 import { syncEvents } from "../backend/events.ts";
-import type { AihotAnswer, AihotClient } from "../backend/client.ts";
+import { AihotHttpError, type AihotAnswer, type AihotClient } from "../backend/client.ts";
 import type { AihotHotTopics, AihotStoryDetail } from "../backend/types.ts";
 
 const T = tag();
@@ -23,6 +23,10 @@ function fakeClient(routes: Record<string, unknown>): AihotClient {
       if (path in routes) return { data: routes[path] as T, notModified: false, etag: null };
       const hit = Object.keys(routes).filter((key) => path.startsWith(`${key}/`)).sort((a, b) => b.length - a.length)[0];
       return { data: (hit ? routes[hit] : null) as T | null, notModified: false, etag: null };
+    },
+    // The events feed reads no page; a detail read here would be a bug, and says so.
+    async text(path: string): Promise<never> {
+      throw new AihotHttpError(404, `${path}: 404`);
     },
   };
 }

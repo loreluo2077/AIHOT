@@ -11,7 +11,7 @@
 
 | 功能 | 位置 | 状态 |
 |---|---|---|
-| **AIHOT 内容镜像**（精选条目 + 撤选 + 热点事件 + 日报周报月报） | `modules/aihot-bridge/`（19 个文件） | 已开（`AIHOT_BRIDGE_ENABLED=true`） |
+| **AIHOT 内容镜像**（精选条目 + 正文 + 撤选 + 热点事件 + 日报周报月报） | `modules/aihot-bridge/`（23 个文件） | 已开（`AIHOT_BRIDGE_ENABLED=true`） |
 | **自建模型榜**（评测名次 + 领域分数 + 上线日期 + 价格） | `modules/leaderboard/`（21 个文件） | 已开（每天 06:10 刷新） |
 | **引擎插口：导入外部已定事件** | `packages/backend/src/events/import.ts`（143 行） | 被上面第一个模块调用 |
 | 注册与配置 | `site/modules/*.ts`、`site/package.json`、`Dockerfile`、`.env.example` | — |
@@ -48,7 +48,7 @@ node --env-file-if-exists=.env apps/worker/src/main.ts
 npm run dev -w @aihot/web                   # 网站 :3000
 
 # 手动同步（不用等排程）
-node --env-file-if-exists=.env modules/aihot-bridge/scripts/sync.ts all      # items|changes|events|reports
+node --env-file-if-exists=.env modules/aihot-bridge/scripts/sync.ts all      # items|changes|events|reports|detail
 node --env-file-if-exists=.env modules/leaderboard/scripts/sync.ts
 
 # 检查
@@ -66,24 +66,26 @@ npm run test:standalone
 | 文件 | 作用 |
 |---|---|
 | `config.ts` | 全部开关与参数（唯一读取 `AIHOT_BRIDGE_ENABLED`、`AIHOT_BRIDGE_BASE_URL` 的地方） |
-| `server.ts` | 4 条排程 + 告警 |
-| `backend/client.ts` | 对 AIHOT 公开 API 的 HTTP 客户端：单请求串行、1.2 秒间隔、ETag、429 按 `Retry-After` 等 |
+| `server.ts` | 5 条排程 + 告警 |
+| `backend/client.ts` | 对 AIHOT 公开 API 的 HTTP 客户端：单请求串行、1.2 秒间隔、ETag、429 按 `Retry-After` 等；`text()` 抓条目页 HTML，同一套节奏 |
 | `backend/types.ts` | AIHOT 接口的响应类型（items / snapshot / changes / stories / dailies…） |
 | `backend/mapping.ts` | 纯映射：条目 → 框架的分析字段；日报周报月报 → 框架的报告结构 |
 | `backend/import.ts` | 落库：`upsertMaterial` 落料 → 写 `analyses` → 调公开层 `publishArticle` |
 | `backend/events.ts` | 热点榜与事件：拉 hot-topics + 事件详情，交给引擎插口 |
-| `backend/sync.ts` | 三路同步的编排（条目 / 撤选台账 / 报告） |
+| `backend/sync.ts` | 各路同步的编排（条目 / 撤选台账 / 报告 / 正文） |
+| `backend/detail.ts` | **正文那一路上落库**：抓条目页 → 写 `articles` 正文 → 写中文 `translations` → 把随条目来的判断搬到新 revision |
+| `backend/detail-page.ts` | 正文区块的纯解析：`div.prose`，按标签栈找它自己的闭合标签 |
 | `backend/state.ts` | 自己两张表的读写 |
 | `backend/summary.ts` | 每路同步的统计结构 |
 | `backend/status.ts` | 给后台与告警看的状态 |
 | `migrations/0100_aihot_bridge_items.sql` | 导入映射表（AIHOT 条目 id ↔ 本站文章 id、payload 哈希、是否本模块所有） |
 | `migrations/0101_aihot_bridge_sync.sql` | 每路同步的游标/ETag/上次结果 |
-| `scripts/sync.ts` | 手动同步 CLI |
-| `tests/` | 3 个测试文件（映射纯函数 + 导入 + 事件） |
+| `scripts/sync.ts` | 手动同步 CLI（`items/changes/events/reports/detail/all`）。退出前先 `stopBoss()`：**发布正文会惰性启动 pg-boss**，只 `closeDb()` 的话脚本会一直挂着不退（已修） |
+| `tests/` | 5 个测试文件（映射/正文解析纯函数 + 导入 + 事件 + 正文） |
 | `README.md` | 模块说明（含合规前置条件） |
 
-**它写入的框架表**：`articles`、`analyses`（`origin='replay'`）、`sources`、`reports`（`origin='imported'`），以及通过插口写 `stories`/`facts`/`fact_articles`/`story_signals`/`story_digests`。
-**它绝不调用模型**：判断是随条目拿到的，条目进来时 `processing_state` 直接是 `analyzed`。
+**它写入的框架表**：`articles`（含正文）、`analyses`（`origin='replay'`）、`translations`（`origin='replay'`）、`sources`、`reports`（`origin='imported'`），以及通过插口写 `stories`/`facts`/`fact_articles`/`story_signals`/`story_digests`。
+**它绝不调用模型**：判断是随条目拿到的，条目进来时 `processing_state` 直接是 `analyzed`；正文那一路上是一个新 revision，模块在同一次事务里把判断搬到新 revision 并重新标成 `analyzed`，所以也不会触发付费分析。
 
 ### 1.2 新增模块：`modules/leaderboard/` —— 自建模型榜
 
@@ -156,6 +158,9 @@ AIHOT 公开 API                    本站库
 /api/v1/hot-topics + /api/v1/stories/{id}
       └─▶ stories / facts / fact_articles / story_signals / story_digests ──▶ /hot 热点榜、/story/<uuid> 事件页
 /api/v1/{dailies,weeklies,monthlies} ──▶ reports(origin=imported) ──▶ /daily /weekly /monthly 与 RSS
+条目页 /items/<id>/original ──原文──▶ articles.body_text/body_html + 新 revision ──▶ （只在库里/后台）
+条目页 /items/<id> ──中文「正文 · AI 翻译」──▶ translations(origin=replay) ──▶ （只在库里）
+      ⚠️ 这两份都不对外：镜像来源 site_fulltext=false → 公开读取层一律 body_mode='summary'
 本模块自己的表：aihot_bridge_items（导入映射）、aihot_bridge_sync（游标与上次结果）
 ```
 
@@ -196,6 +201,52 @@ OpenRouter 公开接口 /api/v1/models ──▶ leaderboard_models（上下文�
 ⚠️ 注意：分类 key 改了以后，**镜像内容里的分类还是 AIHOT 的分类**（`ai-*`）。
 要么保留这些分类，要么在 `modules/aihot-bridge/config.ts` 的 `categoryMap` 里把它们映到你的 key。
 
+### A2. 本机抓信源报「Blocked private address」
+
+**现象**：`scripts/collect.ts` 报 `Blocked private address for <域名>`，一条都抓不到。
+
+**原因**：这台机器的 DNS 走了 fake-IP 代理（域名解析成 `198.18.x.x`），而引擎有 SSRF 保护，把这种地址当内网拦下。
+
+**本机调试的解法**：`.env` 里开 `ALLOW_PRIVATE_NETWORK_FETCH=true`（框架文档里的本机调试开关）。
+
+> ⚠️ **生产环境不要开**：它会关掉 SSRF 保护，而且 `NODE_ENV=production` 时框架**直接拒绝启动**。
+> 正常服务器上 DNS 解析到公网地址，不需要这个开关。
+
+镜像模块不受影响：它用的是自己的 HTTP 客户端，不走这层保护。
+
+### A3. 第一次真跑一轮学到的（正文、成本、休眠）
+
+**1. `COLLECT_ENABLED=false` 会把"取正文"一起关掉。**
+取正文的队列注册在 `registerSourceJobs` 里（`jobs/sources.ts` 调用 `registerExtractionJobs`），而它只在
+`COLLECT_ENABLED=true` 时注册。所以"先只开模型、不开采集"会让手动采集来的文章卡在待抽取。
+→ 要让文章被完整分析，`COLLECT_ENABLED` 和 `MODEL_CALLS_ENABLED` **要一起开**。
+
+**2. 正文抓不到时，模型只能看摘要，分数会明显偏低。**
+抽取的顺序是：先直接抓页面 + Readability，失败才回退 **Jina Reader**（付费，需要 `JINA_API_KEY`）。
+没有 Jina key 时，抓满 3 次（每次间隔 10 分钟）后文章降级为 `body_status='unconfirmed'`，按 RSS 摘要判断。
+
+同一天同一批文章实测（T2 门槛 76）：
+
+| 正文 | 评分 | 例子 |
+|---|---|---|
+| 有全文（`ok`） | **60 / 58** | OpenAI 将在欧盟默认给 ChatGPT 输出加水印 |
+| 只有摘要（`unconfirmed`） | **40 / 23 / 20** | Nvidia 押注物理 AI / Radisson 接入 ChatGPT |
+
+→ **要"选得准"，正文这一环不能省**：要么配 Jina（有免费额度），要么只用 feed 里自带全文的信源。
+
+**3. 成本量级**（DeepSeek，6 篇文章 + 事件综述）：**34 次调用、6.8 万输入 token、2500 输出 token ≈ 7 分钱**，
+摊到每篇约 **1 分多**。按这个量级，每天 100 篇大约 1–2 元。（精确金额要在后台「模型与价格」填单价，
+`service_prices` 为空时后台不显示金额，只记 token 与耗时。）
+
+**4. 吞吐被"每分钟预算 × 每 5 分钟 sweep"夹住。**
+实测：每分钟调用数呈「20、1、20、1…」——一轮 sweep 放进来一批，几十秒内撞上 `per_minute` 上限，
+被撞到的文章按 `BudgetExceededError` 推迟（`processing_retry_at`），只能等下**一轮 sweep（5 分钟）**再捡。
+所以有效吞吐 ≈ `per_minute × 60 ÷ 6`（每篇约 6 次调用），而**不是** `per_minute × 60`。
+放量时把 `per_minute` 调到几十以上（后台「设置 → 付费请求上限」，或直接改 `budgets` 表），否则会看起来"很慢"。
+
+**5. 笔记本休眠 = 流水线停摆。** 实测 22:50→23:08 断了 18 分钟，因为整机睡了（排程、worker 一起停）。
+正式部署要放在不睡的机器上；本机试跑时别合盖。
+
 ### B. 调镜像的行为
 
 | 想改什么 | 改哪里 |
@@ -203,8 +254,9 @@ OpenRouter 公开接口 /api/v1/models ──▶ leaderboard_models（上下文�
 | 拉多少、窗口多大 | `modules/aihot-bridge/config.ts`：`itemsWindow`、`maxItemsPerRun`、`pageLimit` |
 | 事件与热点 | 同上：`hotTopics.{top,maxReportsPerEvent,importMissingReports}` |
 | 报告保留几期 | 同上：`reportHistory` |
+| 每轮取多少条正文 | 同上：`detail.maxPerRun`（默认 60，每个条目最多两次请求） |
 | 分类映射、来源分级、是否接管已有文章 | 同上：`categoryMap`、`source.tier`、`takeoverExisting` |
-| 同步频率 | `modules/aihot-bridge/server.ts` 的 4 条 `cron` |
+| 同步频率 | `modules/aihot-bridge/server.ts` 的 5 条 `cron` |
 | 请求间隔（对方限流） | `config.ts` 的 `minIntervalMs`（默认 1200ms） |
 
 ### C. 换/加一个模型榜数据源
@@ -281,6 +333,27 @@ npm run build -w @aihot/web && node --test apps/web/tests/*.test.ts     # 改了
 
 ---
 
+## 7.5 真实链路验证记录（2026-10-08，DeepSeek）
+
+第一次用真实信源 + 真实模型跑通了整条链路，结论：**链路没有问题**。
+
+| 项 | 数字 |
+|---|---|
+| 信源 | 18 个示范 RSS，一次抓完，0 失败（首次导入上限各 8 条） |
+| 入库文章 | 100 篇（其中 89 篇 RSS 自带全文，无需 Jina） |
+| 完整走完链路 | 23 篇：预筛 → 两次评分 → 结构化 → 中文标题摘要 → 归组 → 事件综述 |
+| 进入精选 | **3 篇**（88 分 T2 / 80 分 T2 / 66 分 T1）；其余进「全部动态」 |
+| 模型调用 | 161 次，输入 65.7 万 token，输出 1.19 万 token，平均延迟 965ms |
+| 花费 | 按 DeepSeek 输入 ¥1/百万、输出 ¥2/百万估 **≈ ¥0.7**（约 **3 分/篇**） |
+| 剩余 | 77 篇排队未分析（停阀门后不再消耗，随时可以继续） |
+
+跑完这一轮顺手完善了 A3 节的三条经验：`COLLECT_ENABLED` 会连"取正文"一起关、
+正文有无直接决定分数（60 vs 40）、吞吐被"每分钟预算 × 每 5 分钟 sweep"夹住。
+
+**想继续跑**：`.env` 里把 `COLLECT_ENABLED=true`、`MODEL_CALLS_ENABLED=true`，再启动 worker；
+77 篇会在下一轮 sweep 被自动捡起，不用手工干预。
+**想停止花钱**：两个阀门设回 `false` 并停 worker（本次就是这么收的）；已加工的内容继续在站上服务。
+
 ## 8. 还没做、已知边界（下次可以接着做）
 
 **模型榜**
@@ -294,7 +367,12 @@ npm run build -w @aihot/web && node --test apps/web/tests/*.test.ts     # 改了
 - 热度的"参与来源数"比 AIHOT 页面上的小，因为只统计本站真正拿到的报道（这是有意的口径）。
 - 事件之间没有关联（`story_links` 留给框架自己算）；镜像内容不进主题页（条目接口不给标签）。
 - 首次会把 AIHOT 的精选快照走完：每 10 分钟最多 300 条，全量约需数小时（已走过一次）。
-- 正文一律不镜像（只给摘要 + 原文链接），`site_fulltext` 保持关闭。
+- **正文已经镜像进库，但没有对外**：条目页上的「原文」进 `articles.body_text`，它的中文「正文 · AI 翻译」进 `translations`（都只在库里/后台）。镜像来源 `site_fulltext`、`syndicate_fulltext` 都是 `false`，公开读取层因此一律算作 `body_mode='summary'`，读者看到的仍然是摘要 + 原文链接。
+- 正文只有页面上有，接口不给，所以这一路取的是 HTML：对方的路径或 `div.prose` 形状一变就取不到，会把条目记成 `unconfirmed`（"没有正文"）而不是写坏数据；改形状要动 `backend/detail-page.ts`。
+- 正文回填是分批的：每 30 分钟 `detail.maxPerRun`（默认 60）条，4457 条约 19 小时走完；再加上下面的反爬墙，同一批要多跑几轮才齐。
+- **对方有反爬墙（EdgeOne bot 管理）**：页面有时回 `403`，有时回一个 **1 KB 的 JS 挑战页（状态码还是 200）**，真实页面 40 KB。这一路**不解决挑战**（规则禁止绕过安全措施，模块里也没有浏览器内核），只把它认出来当作"这一轮没读到"，条目留到下一轮。**第一版就栽在这里**：把挑战页当成了"AIHOT 没有正文"，一次跑出 45 条假的 `unconfirmed`（已改回并修掉了判定条件）。
+- 一轮一个页面都没读到（墙或形状变了）时，这一路把这一轮记成失败并报出来，不假装成功；连读 5 条都读不到就提前收手，不硬撞墙。本机实测：我这台机器的 IP 一旦被标记，静默 45 秒后每 3.5 秒一个请求仍然全是挑战页——这是对方的节奏，不是代码能绕的。
+- 正文的**授权**比摘要严一层：「原文」的版权在原始站点手里，「中文正文」是 AIHOT 的 AI 翻译；要对外展示先取书面授权，只要原文的话建议直接抓原站。
 
 **运维**
 - 数据库与 Node 都在 `/tmp`（见第 4 节）。
