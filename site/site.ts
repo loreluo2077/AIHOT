@@ -246,7 +246,7 @@ export const CARDS: Record<string, { kicker: string; title: string; subtitle: st
   feedback: { kicker: "反馈", title: "告诉我们哪里可以更好", subtitle: "内容、功能、接入，或来源方的更正与下架请求。" },
   agent: { kicker: "Agent 接入", title: `把 ${SITE.name} 接进你的 Agent`, subtitle: "MCP、RSS、API 三种方式，匿名只读，无需 API Key。" },
   // 模块自己的页面（modules/fomo、modules/services、modules/leaderboard 里的 meta 引用这几个 key）。
-  fomo: { kicker: "今日FOMO", title: "别慌，大家都一样", subtitle: "AI FOMO 首页：今天的焦虑指数、四张轮播的焦虑瞬间、一份心情投票和一面留言墙。", accent: "hot" },
+  fomo: { kicker: "今日FOMO", title: "别慌，大家都一样", subtitle: "AI FOMO 首页：四张轮播的焦虑瞬间、一份心情投票和一面留言墙。", accent: "hot" },
   tools: { kicker: "AI 服务", title: "我们在用、也愿意推荐的 AI 服务", subtitle: "点进去是各自的站点；本站不是这些服务的提供方。" },
   leaderboard: { kicker: "模型榜", title: "第三方的模型成绩，一张表看完", subtitle: "评测机构公开的成绩，配上供应商公布的上下文长度与价格。" },
 };

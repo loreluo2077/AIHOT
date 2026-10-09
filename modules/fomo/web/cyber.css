@@ -4,7 +4,8 @@
    Every class is cyber-prefixed so nothing can collide with the engine's, and the quiz module's
    self-test page imports this file too (see the package's exports). */
 
-/* The panel the three pages sit in: fixed dark ground, one hairline frame, corners cut like a screen. */
+/* The panel the fomo homepage and the self-test page sit in: fixed dark ground, one hairline frame,
+   the engine's card radius. Its text inherits the engine's own fonts — only the colours are its own. */
 .cyber {
   --cyber-bg: #0a0d12;
   --cyber-panel: #12161f;
@@ -20,12 +21,9 @@
   border-radius: var(--radius-card, 12px);
   background: var(--cyber-bg);
   color: var(--cyber-ink);
-  /* The prototype set the whole page in a mono; on system fonts the Latin and digits stay mono and
-     CJK falls to the reader's default, which reads the same at these sizes. */
-  font-family: var(--font-mono, ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace);
 }
 
-/* The prototype's display face (Rajdhani) becomes the sans, bold and tracked — close enough at distance. */
+/* The prototype's display treatment on the engine's own face: bold, tracked, uppercased. */
 .cyber-display {
   font-family: var(--font-sans, system-ui, sans-serif);
   font-weight: 700;
@@ -33,13 +31,15 @@
   text-transform: uppercase;
 }
 
-/* The prototype's panel: cut corners with a hairline gradient at top and bottom. */
+/* The prototype's panel on this site's card geometry: the engine's radius and card shadow, with the
+   prototype's dark ground, hairline border, and the gradient hairlines at top and bottom kept. */
 .cyber-panel {
   position: relative;
   overflow: hidden;
   background: var(--cyber-panel);
   border: 1px solid var(--cyber-line);
-  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  border-radius: var(--radius-card, 12px);
+  box-shadow: var(--shadow-card);
 }
 .cyber-panel::before,
 .cyber-panel::after {
@@ -88,14 +88,6 @@
   pointer-events: none;
   z-index: 40;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, color-mix(in srgb, var(--cyber-yellow) 10%, transparent) 2px, color-mix(in srgb, var(--cyber-yellow) 10%, transparent) 4px);
-}
-
-/* Cut corners for buttons and badges. */
-.cyber-corner-tl {
-  clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
-}
-.cyber-corner-tr {
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
 }
 
 /* Neon hover glows, one per colour. */

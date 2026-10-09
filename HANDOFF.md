@@ -205,5 +205,21 @@ node scripts/smoke.ts --base http://127.0.0.1:3000
   insights 接口、`fomoInsightsPayload`、`FomoInsightsPayload/FomoDayView/FomoTrendDayView`、
   `trendsDays`、`CARDS.trends` 全删。模块只剩 `/api/fomo/today` 一个接口。
 - 旧地址 `/fomo`、`/timeline`、`/trends` 一律 301 → `/`。侧栏「指数」分区只剩 今日FOMO + FOMO 自测（quiz 的）。
+
+## 14. 第八批增补（2026-10-09，FOMO 自测改名 + 首页直出）
+
+- 「AI 自测」全站改名「FOMO 自测」（quiz 的 handle/meta/侧栏/我的页、首页 CTA 与页脚、文档与 changelog）。
+- 首页删了 `useParallax`（滚动视差）与 `useReveal`（滚动逐块显现）：内容整页直出、滚动零重渲染，
+  计数动画改为打开即跑。保留：Hero 轮播、glitch/霓虹、hover 效果。
+
+## 15. 第九、十批增补（2026-10-09，版式对齐 + 指数隐藏）
+
+- **版式对齐整站**：两页根面板 `max-w-[var(--page-max-reading)] lg:mt-3 mb-14`（FOMO自测从 672px 窄盒变整站宽，
+  内层 `max-w-2xl` 居中答题列）；首页内层内容加宽一档（Hero 5xl 等）。组件几何用引擎令牌：
+  `.cyber-panel` 圆角卡片（`--radius-card` + `--shadow-card`，切角类已删）、按钮药丸/瓦片、量尺条圆头。
+  **颜色与特效未动。**
+- **字体用引擎的**：`.cyber` 不覆盖字体（正文=引擎 sans）；小字「// 代码标签」用引擎 `.mono`。
+- **首页指数区块默认隐藏**：`config.ts` 的 `showTodayIndex: false` 门控区块 + loader 请求 + 浏览器刷新；
+  想展示改 `true`。meta/CARDS 文案已同步。`/api/fomo/today` 接口照常保留。
 - 全量 `npm test` 在这台 Windows 机上跑不完是环境问题：测试框架用 `pg_dump` 克隆库、
   `openssl` 生成证书、SIGTERM 测试只在 POSIX 下有效——单独跑模块测试是绿的（见第 11 节检查记录的方式）。

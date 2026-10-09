@@ -61,13 +61,13 @@ function Quiz<Q extends Question>({ questions, sideLabel, onComplete }: { questi
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs text-(--cyber-muted)">
-          <span className="tabular-nums">
+          <span className="mono tabular-nums">
             问题 {index + 1}/{questions.length}
           </span>
           <span className="text-(--cyber-cyan)">{sideLabel(question)}</span>
         </div>
-        <div className="h-1 w-full overflow-hidden bg-(--cyber-muted)/15">
-          <div className="h-full bg-(--cyber-yellow) transition-all" style={{ width: `${(index / questions.length) * 100}%` }} />
+        <div className="h-1 w-full overflow-hidden rounded-full bg-(--cyber-muted)/15">
+          <div className="h-full rounded-full bg-(--cyber-yellow) transition-all" style={{ width: `${(index / questions.length) * 100}%` }} />
         </div>
       </div>
 
@@ -82,13 +82,13 @@ function Quiz<Q extends Question>({ questions, sideLabel, onComplete }: { questi
               key={option.label}
               type="button"
               onClick={() => pick(optionIndex)}
-              className={`flex items-center gap-3 border px-4 py-3 text-left text-sm transition ${
+              className={`flex items-center gap-3 rounded-tile border px-4 py-3 text-left text-sm transition ${
                 chosen === optionIndex
                   ? "border-(--cyber-yellow) bg-(--cyber-yellow)/10 text-(--cyber-yellow)"
                   : "border-(--cyber-line) text-(--cyber-ink) hover:border-(--cyber-yellow)/60 hover:text-(--cyber-yellow)"
               } ${chosen !== null && chosen !== optionIndex ? "opacity-50" : ""}`}
             >
-              <span className={`flex size-6 shrink-0 items-center justify-center border text-[11px] ${chosen === optionIndex ? "border-(--cyber-yellow)" : "border-(--cyber-line) text-(--cyber-muted)"}`}>
+              <span className={`mono flex size-6 shrink-0 items-center justify-center rounded-mark border text-[11px] ${chosen === optionIndex ? "border-(--cyber-yellow)" : "border-(--cyber-line) text-(--cyber-muted)"}`}>
                 {String.fromCharCode(65 + optionIndex)}
               </span>
               {option.label}
@@ -111,8 +111,8 @@ function Bar({ label, value, max }: { label: string; value: number; max: number 
   return (
     <div className="flex items-center gap-3">
       <span className="w-20 shrink-0 text-xs text-(--cyber-muted)">{label}</span>
-      <div className="h-2.5 flex-1 overflow-hidden bg-(--cyber-muted)/15">
-        <div className="h-full bg-(--cyber-cyan)/70" style={{ width: `${Math.max(2, (value / max) * 100)}%` }} />
+      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-(--cyber-muted)/15">
+        <div className="h-full rounded-full bg-(--cyber-cyan)/70" style={{ width: `${Math.max(2, (value / max) * 100)}%` }} />
       </div>
       <span className="w-10 shrink-0 text-right text-xs text-(--cyber-muted) tabular-nums">{value}</span>
     </div>
@@ -132,7 +132,7 @@ function SurvivalResult({ answers, onRetry, onSwitch }: { answers: Record<number
           {score}
         </div>
         <div className="text-xs text-(--cyber-muted) tabular-nums">/ 100 生存指数</div>
-        <span className="mt-1 border px-3 py-1 text-sm font-medium" style={{ borderColor: `color-mix(in srgb, ${gradeInk(level.grade)} 40%, transparent)`, color: gradeInk(level.grade) }}>
+        <span className="mt-1 rounded-full border px-3 py-1 text-sm font-medium" style={{ borderColor: `color-mix(in srgb, ${gradeInk(level.grade)} 40%, transparent)`, color: gradeInk(level.grade) }}>
           {level.grade} 级 · {level.label}
         </span>
         <p className="text-sm text-(--cyber-muted)">{level.description}</p>
@@ -150,14 +150,14 @@ function SurvivalResult({ answers, onRetry, onSwitch }: { answers: Record<number
         <button
           type="button"
           onClick={() => void navigator.clipboard.writeText(message).catch(() => undefined)}
-          className="border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-yellow) hover:text-(--cyber-yellow)"
+          className="rounded-full border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-yellow) hover:text-(--cyber-yellow)"
         >
           复制结果
         </button>
-        <button type="button" onClick={onRetry} className="border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-yellow) hover:text-(--cyber-yellow)">
+        <button type="button" onClick={onRetry} className="rounded-full border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-yellow) hover:text-(--cyber-yellow)">
           重新测一遍
         </button>
-        <button type="button" onClick={onSwitch} className="bg-(--cyber-yellow) px-4 py-1.5 text-sm font-medium text-(--cyber-bg)">
+        <button type="button" onClick={onSwitch} className="rounded-full bg-(--cyber-yellow) px-4 py-1.5 text-sm font-medium text-(--cyber-bg)">
           测测你的焦虑值 →
         </button>
       </div>
@@ -178,7 +178,7 @@ function AnxietyResult({ answers, onRetry, onSwitch }: { answers: Record<number,
           {score}
         </div>
         <div className="text-xs text-(--cyber-muted) tabular-nums">/ 50 焦虑值</div>
-        <span className="mt-1 border px-3 py-1 text-sm font-medium" style={{ borderColor: `color-mix(in srgb, ${gradeInk(level.grade)} 40%, transparent)`, color: gradeInk(level.grade) }}>
+        <span className="mt-1 rounded-full border px-3 py-1 text-sm font-medium" style={{ borderColor: `color-mix(in srgb, ${gradeInk(level.grade)} 40%, transparent)`, color: gradeInk(level.grade) }}>
           {level.grade} 级 · {level.label}
         </span>
         <p className="text-sm text-(--cyber-muted)">{level.description}</p>
@@ -189,9 +189,9 @@ function AnxietyResult({ answers, onRetry, onSwitch }: { answers: Record<number,
           <span>完全不焦虑</span>
           <span>焦虑爆表</span>
         </div>
-        <div className="h-2.5 w-full overflow-hidden bg-(--cyber-muted)/15">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-(--cyber-muted)/15">
           <div
-            className="h-full"
+            className="h-full rounded-full"
             style={{ width: `${Math.max(2, (score / 50) * 100)}%`, background: "linear-gradient(to right, var(--cyber-cyan), var(--cyber-yellow), var(--cyber-magenta))" }}
           />
         </div>
@@ -208,14 +208,14 @@ function AnxietyResult({ answers, onRetry, onSwitch }: { answers: Record<number,
         <button
           type="button"
           onClick={() => void navigator.clipboard.writeText(message).catch(() => undefined)}
-          className="border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-magenta) hover:text-(--cyber-magenta)"
+          className="rounded-full border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-magenta) hover:text-(--cyber-magenta)"
         >
           复制结果
         </button>
-        <button type="button" onClick={onRetry} className="border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-magenta) hover:text-(--cyber-magenta)">
+        <button type="button" onClick={onRetry} className="rounded-full border border-(--cyber-line) px-4 py-1.5 text-sm text-(--cyber-ink) transition hover:border-(--cyber-magenta) hover:text-(--cyber-magenta)">
           重新测一遍
         </button>
-        <button type="button" onClick={onSwitch} className="bg-(--cyber-magenta) px-4 py-1.5 text-sm font-medium text-(--cyber-bg)">
+        <button type="button" onClick={onSwitch} className="rounded-full bg-(--cyber-magenta) px-4 py-1.5 text-sm font-medium text-(--cyber-bg)">
           深度 AI 生存测试 →
         </button>
       </div>
@@ -235,9 +235,12 @@ export default function SelfTestPage(): ReactNode {
   ];
 
   return (
-    <div className="cyber cyber-noise mx-auto mb-6 flex w-full max-w-2xl flex-col gap-6 px-4 py-6 md:my-4">
+    // The panel spans the site's reading width like the fomo homepage; the test column itself stays at
+    // the engine quizzes' 2xl, so option rows do not stretch past a comfortable tap width.
+    <div className="cyber cyber-noise mx-auto mb-14 w-full max-w-[var(--page-max-reading)] lg:mt-3">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-6 md:py-8">
       <header className="flex flex-col gap-2 text-center">
-        <div className="text-[10px] tracking-widest uppercase text-(--cyber-muted)">SELF-TEST // FOMO 自测</div>
+        <div className="mono text-[10px] tracking-widest uppercase text-(--cyber-muted)">SELF-TEST // FOMO 自测</div>
         <h1 className="cyber-display text-2xl font-bold">
           <span className="cyber-text-gradient">测一测</span>
           <span className="text-(--cyber-ink)"> 你和 AI 时代的距离</span>
@@ -281,6 +284,7 @@ export default function SelfTestPage(): ReactNode {
       <p className="text-center text-xs text-(--cyber-muted)/60">
         等级只是把同样的题分成 {QUIZ_LEVELS.length} 档（{QUIZ_LEVELS.map((level) => level.grade).join(" / ")}），图个参照；焦虑值只描述这一刻的心情，不构成任何建议。
       </p>
+      </div>
     </div>
   );
 }

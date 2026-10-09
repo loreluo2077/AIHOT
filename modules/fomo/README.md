@@ -5,9 +5,10 @@ eva-s-fomo-finder 的体验在引擎上的落地：**首页复刻原项目的赛
 
 - 页面：
   - `/` **今日FOMO**：复刻 eva 的 Index 页——轮播四张「刺激卡」的 Hero（视差网格、霓虹闪烁、故障动画）、
-    **今日指数**（服务端读 `/api/fomo/today`：计数动画、分档量尺、当天四项数字；api 不可用时显示占位而不挂页）、
     「什么是 AI FOMO」科普、心情投票（本地计数）、留言墙（localStorage，只存在这台浏览器）与静态 feed 卡。
     CTA 进 `/fomo-test`（合并自测）。**引擎的精选流让出了根路径，住在 `/featured`**。
+    **今日指数区块**（计数动画、分档量尺、当天四项数字）由 `showTodayIndex` 门控：目前 **关着**
+    （使用者暂不想展示指数；改 `config.ts` 的这个开关为 `true` 即回来，loader、区块与接口都留着）。
   - `/fomo-test` **FOMO 自测**：见 quiz 模块（`modules/quiz`）。
 - 皮肤：`web/cyber.css`——固定深色（黄/青/品红霓虹），不随读者主题；quiz 模块的自测页也 import 它
   （`package.json` 里导出 `./web/cyber.css`，`sideEffects` 只放行 CSS）。
@@ -42,6 +43,7 @@ eva-s-fomo-finder 的体验在引擎上的落地：**首页复刻原项目的赛
 
 | 字段 | 默认 | 说明 |
 |---|---|---|
+| `showTodayIndex` | `false` | 首页是否展示今日指数区块（含 loader 请求）；要展示改 `true` |
 | `factors` | 见文件 | 四项的权重，四者之和必须是 1 |
 | `reference` | `{ selected: 8, stories: 5, firstPartyRatio: 0.2 }` | 三项的固定下限（满分线） |
 | `baselineDays` / `baselineMinimumDays` | 30 / 7 | 回看多少天、够多少天才用 90 分位抬高下限 |

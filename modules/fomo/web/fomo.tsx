@@ -18,7 +18,7 @@ export function meta() {
   // The share card is the site's own (site/site.ts CARDS.fomo): this page is what people forward.
   return pageMeta({
     title: "AI FOMO",
-    description: "别慌，大家都一样。今天的焦虑指数、轮播的四个瞬间、一份心情投票和一面留言墙——你的 AI 焦虑，这里有人陪。页面不收集任何数据。",
+    description: "别慌，大家都一样。轮播的四个瞬间、一份心情投票和一面留言墙——你的 AI 焦虑，这里有人陪。页面不收集任何数据。",
     path: "/",
     image: "/og/pages/fomo.png",
   });
@@ -43,7 +43,8 @@ async function fetchPayload(url: string, signal?: AbortSignal): Promise<FomoPayl
 }
 
 export async function loader({ request }: { request: Request }): Promise<{ payload: FomoPayload | null }> {
-  return { payload: await fetchPayload(`${API_BASE_URL}/api/fomo/today`, request.signal) };
+  // While the today-index block is switched off (config), the page asks for nothing.
+  return { payload: FOMO.showTodayIndex ? await fetchPayload(`${API_BASE_URL}/api/fomo/today`, request.signal) : null };
 }
 
 /** The four moments the hero rotates through, verbatim from the prototype. */
@@ -130,10 +131,10 @@ function TodaySection({ payload }: { payload: FomoPayload | null }): ReactNode {
 
   return (
     <section className="px-4 py-12">
-      <div className="cyber-panel cyber-hover-yellow mx-auto max-w-xl p-6 md:p-8">
+      <div className="cyber-panel cyber-hover-yellow mx-auto max-w-3xl p-6 md:p-8">
         <div className="mb-3 flex items-center justify-between">
-          <div className="text-[10px] tracking-widest uppercase text-(--cyber-muted)">INDEX // 今日指数</div>
-          <div className="text-[10px] text-(--cyber-muted)/60">{payload?.day ?? ""}（北京时间）</div>
+          <div className="mono text-[10px] tracking-widest uppercase text-(--cyber-muted)">INDEX // 今日指数</div>
+          <div className="mono text-[10px] text-(--cyber-muted)/60">{payload?.day ?? ""}（北京时间）</div>
         </div>
         {payload ? (
           <>
@@ -142,20 +143,20 @@ function TodaySection({ payload }: { payload: FomoPayload | null }): ReactNode {
                 {shown}
               </div>
               <div className="mt-2 text-xs text-(--cyber-muted)">/ 100 内容强度</div>
-              <div className="mt-4 border px-4 py-1.5 text-sm font-bold tracking-wider uppercase" style={{ borderColor: `color-mix(in srgb, ${bandInk} 40%, transparent)`, color: bandInk }}>
+              <div className="mt-4 rounded-full border px-4 py-1.5 text-sm font-bold tracking-wider uppercase" style={{ borderColor: `color-mix(in srgb, ${bandInk} 40%, transparent)`, color: bandInk }}>
                 {band?.label}
               </div>
             </div>
 
             {/* The gauge the number sits on, with the three bands as its scale. */}
             <div className="mt-6 w-full">
-              <div className="h-2 w-full overflow-hidden bg-(--cyber-muted)/15">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-(--cyber-muted)/15">
                 <div
-                  className="h-full transition-all duration-1000"
+                  className="h-full rounded-full transition-all duration-1000"
                   style={{ width: `${Math.max(2, payload.index)}%`, background: "linear-gradient(to right, var(--cyber-cyan), var(--cyber-yellow), var(--cyber-magenta))" }}
                 />
               </div>
-              <div className="mt-2 flex justify-between text-[10px] text-(--cyber-muted)">
+              <div className="mono mt-2 flex justify-between text-[10px] text-(--cyber-muted)">
                 {FOMO.bands.map((b) => (
                   <span key={b.key}>
                     {b.label} ≤{b.max}
@@ -167,7 +168,7 @@ function TodaySection({ payload }: { payload: FomoPayload | null }): ReactNode {
             {/* The day's own numbers, under the index. */}
             <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
               {stats.map((stat) => (
-                <div key={stat.label} className="flex flex-col gap-1 border border-(--cyber-line)/60 p-3 text-center">
+                <div key={stat.label} className="flex flex-col gap-1 rounded-tile border border-(--cyber-line)/60 p-3 text-center">
                   <span className="text-[10px] tracking-widest text-(--cyber-muted)">{stat.label}</span>
                   <span className="cyber-display text-xl font-bold text-(--cyber-cyan) tabular-nums">{stat.value}</span>
                 </div>
@@ -230,10 +231,10 @@ function HeroSection(): ReactNode {
         <div className="absolute bottom-20 left-10 h-px w-full origin-left rotate-[-35deg] bg-gradient-to-r from-(--cyber-magenta)/50 to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
         {/* The warning badge the card wears. */}
         <div
-          className={`cyber-corner-tl mb-8 inline-flex items-center gap-2 border border-(--cyber-yellow)/60 bg-(--cyber-yellow)/10 px-4 py-1.5 text-xs tracking-widest uppercase text-(--cyber-yellow) transition-all duration-500 ${
+          className={`mono mb-8 inline-flex items-center gap-2 rounded-full border border-(--cyber-yellow)/60 bg-(--cyber-yellow)/10 px-4 py-1.5 text-xs tracking-widest uppercase text-(--cyber-yellow) transition-all duration-500 ${
             showWarning ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
           } ${transitioning ? "translate-y-2 opacity-0" : ""}`}
         >
@@ -268,14 +269,14 @@ function HeroSection(): ReactNode {
           <button
             type="button"
             onClick={scrollToVoices}
-            className="cyber-corner-tr cyber-scan-hover cyber-animate-pulse-glow group relative overflow-hidden bg-(--cyber-yellow) px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-(--cyber-bg) transition-all hover:scale-105 hover:shadow-[0_0_30px_color-mix(in_srgb,var(--cyber-yellow)_50%,transparent),0_0_60px_color-mix(in_srgb,var(--cyber-yellow)_20%,transparent)]"
+            className="cyber-scan-hover cyber-animate-pulse-glow group relative overflow-hidden rounded-full bg-(--cyber-yellow) px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-(--cyber-bg) transition-all hover:scale-105 hover:shadow-[0_0_30px_color-mix(in_srgb,var(--cyber-yellow)_50%,transparent),0_0_60px_color-mix(in_srgb,var(--cyber-yellow)_20%,transparent)]"
           >
             <span className="relative z-10">看看大家怎么说 //</span>
             <div className="animate-none absolute inset-0 bg-gradient-to-r from-(--cyber-yellow) via-(--cyber-magenta) to-(--cyber-yellow) bg-[length:200%_100%] opacity-0 transition-opacity group-hover:opacity-100 cyber-animate-border-flow" />
           </button>
           <Link
             to="/fomo-test"
-            className="cyber-glitch-hover border border-(--cyber-cyan)/50 px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-(--cyber-cyan) transition-all hover:scale-105 hover:border-(--cyber-cyan)/80 hover:bg-(--cyber-cyan)/10 hover:shadow-[0_0_20px_color-mix(in_srgb,var(--cyber-cyan)_40%,transparent),0_0_40px_color-mix(in_srgb,var(--cyber-cyan)_15%,transparent)]"
+            className="cyber-glitch-hover rounded-full border border-(--cyber-cyan)/50 px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-(--cyber-cyan) transition-all hover:scale-105 hover:border-(--cyber-cyan)/80 hover:bg-(--cyber-cyan)/10 hover:shadow-[0_0_20px_color-mix(in_srgb,var(--cyber-cyan)_40%,transparent),0_0_40px_color-mix(in_srgb,var(--cyber-cyan)_15%,transparent)]"
           >
             FOMO 自测 &gt;&gt;
           </Link>
@@ -327,9 +328,9 @@ function WhatIsFOMO(): ReactNode {
 
   return (
     <section className="px-4 py-16 md:py-24">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-10 text-center">
-          <div className="mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)">EXPLAIN // 这不是你的错</div>
+          <div className="mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)">EXPLAIN // 这不是你的错</div>
           <h2 className="cyber-display text-2xl font-bold md:text-4xl">
             <span className="text-(--cyber-ink)">什么是 </span>
             <span className="cyber-text-gradient">AI FOMO</span>
@@ -357,7 +358,7 @@ function WhatIsFOMO(): ReactNode {
         </div>
 
         <div className="text-center">
-          <div className="inline-block border border-(--cyber-cyan)/30 bg-(--cyber-cyan)/5 px-5 py-3">
+          <div className="inline-block rounded-tile border border-(--cyber-cyan)/30 bg-(--cyber-cyan)/5 px-5 py-3">
             <p className="text-sm leading-relaxed text-(--cyber-ink)">
               <span className="font-bold text-(--cyber-cyan)">深呼吸。</span>
               这个时代，我们都在被变化推着走。
@@ -391,8 +392,8 @@ function FomoPoll(): ReactNode {
 
   return (
     <section className="px-4 py-12">
-      <div className="cyber-panel mx-auto max-w-xl p-6 md:p-8">
-        <div className="mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)">QUICK.SCAN // 今日心情</div>
+      <div className="cyber-panel mx-auto max-w-3xl p-6 md:p-8">
+        <div className="mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)">QUICK.SCAN // 今日心情</div>
         <h3 className="cyber-display mb-5 text-lg font-bold md:text-xl">
           <span className="text-(--cyber-ink)">今天被 </span>
           <span className="cyber-text-gradient">AI新闻</span>
@@ -409,7 +410,7 @@ function FomoPoll(): ReactNode {
                 type="button"
                 onClick={() => handleVote(opt.value)}
                 disabled={selected !== null}
-                className={`relative overflow-hidden border p-4 text-left transition-all duration-300 ${
+                className={`relative overflow-hidden rounded-tile border p-4 text-left transition-all duration-300 ${
                   selected === opt.value
                     ? "border-(--cyber-yellow) bg-(--cyber-yellow)/10"
                     : selected
@@ -424,7 +425,7 @@ function FomoPoll(): ReactNode {
                   <div className="mb-1 text-2xl">{opt.emoji}</div>
                   <div className="text-sm text-(--cyber-ink)">{opt.label}</div>
                   {selected !== null && (
-                    <div className="cyber-animate-fade-in mt-1 text-xs text-(--cyber-yellow) tabular-nums">
+                    <div className="mono cyber-animate-fade-in mt-1 text-xs text-(--cyber-yellow) tabular-nums">
                       {pct}%（{count}
                       {selected === opt.value ? "+1" : ""}）
                     </div>
@@ -547,17 +548,17 @@ function SubmitVoiceForm({ onSubmitted }: { onSubmitted: () => void }): ReactNod
 
   return (
     <div className="cyber-panel mb-6 flex flex-col gap-3 p-4">
-      <div className="text-[10px] tracking-widest uppercase text-(--cyber-muted)">SUBMIT // SHARE YOUR STORY</div>
+      <div className="mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)">SUBMIT // SHARE YOUR STORY</div>
       <textarea
         value={content}
         onChange={(event) => setContent(event.target.value)}
         maxLength={200}
         rows={2}
         placeholder="你的 AI 焦虑时刻（最多 200 字，只保存在本机）"
-        className="w-full resize-none border border-(--cyber-line)/50 bg-(--cyber-bg)/30 px-3 py-2 text-sm text-(--cyber-ink) outline-none transition-colors placeholder:text-(--cyber-muted)/50 focus:border-(--cyber-yellow)/50"
+        className="w-full resize-none rounded-control border border-(--cyber-line)/50 bg-(--cyber-bg)/30 px-3 py-2 text-sm text-(--cyber-ink) outline-none transition-colors placeholder:text-(--cyber-muted)/50 focus:border-(--cyber-yellow)/50"
       />
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[10px] text-(--cyber-muted)">mood:</span>
+        <span className="mono mr-1 text-[10px] text-(--cyber-muted)">mood:</span>
         {MOOD_OPTIONS.map((m) => (
           <button
             key={m}
@@ -571,12 +572,12 @@ function SubmitVoiceForm({ onSubmitted }: { onSubmitted: () => void }): ReactNod
         ))}
       </div>
       <div className="flex items-center justify-end gap-3">
-        <span className="text-[10px] text-(--cyber-muted) tabular-nums">{[...content].length}/200</span>
+        <span className="mono text-[10px] text-(--cyber-muted) tabular-nums">{[...content].length}/200</span>
         <button
           type="button"
           onClick={submit}
           disabled={!content.trim()}
-          className="border border-(--cyber-yellow)/40 bg-(--cyber-yellow)/10 px-5 py-2 text-xs tracking-wider uppercase text-(--cyber-yellow) transition-all hover:bg-(--cyber-yellow)/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-control border border-(--cyber-yellow)/40 bg-(--cyber-yellow)/10 px-5 py-2 text-xs tracking-wider uppercase text-(--cyber-yellow) transition-all hover:bg-(--cyber-yellow)/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
           SUBMIT
         </button>
@@ -592,7 +593,7 @@ function VoiceCard({ voice }: { voice: { text: string; mood: string; time: strin
       <span className="shrink-0 text-xl">{voice.mood}</span>
       <div className="min-w-0 flex-1">
         <p className="text-sm leading-relaxed text-(--cyber-ink)">"{voice.text}"</p>
-        <div className="mt-1 text-[10px] text-(--cyber-muted)/60">anon · {voice.time}</div>
+        <div className="mono mt-1 text-[10px] text-(--cyber-muted)/60">anon · {voice.time}</div>
       </div>
     </div>
   );
@@ -605,10 +606,10 @@ function FeedCard({ item }: { item: FeedItem }): ReactNode {
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm">{style.icon}</span>
-          <span className="text-[9px] tracking-widest uppercase text-(--cyber-muted)">{style.label}</span>
-          {item.source ? <span className="text-[9px] text-(--cyber-muted)/50">// {item.source}</span> : null}
+          <span className="mono text-[9px] tracking-widest uppercase text-(--cyber-muted)">{style.label}</span>
+          {item.source ? <span className="mono text-[9px] text-(--cyber-muted)/50">// {item.source}</span> : null}
         </div>
-        <span className="text-[9px] text-(--cyber-muted)/40">{timeAgo(new Date(item.at).toISOString())}</span>
+        <span className="mono text-[9px] text-(--cyber-muted)/40">{timeAgo(new Date(item.at).toISOString())}</span>
       </div>
       <p className="text-sm leading-relaxed text-(--cyber-ink) transition-colors group-hover:text-(--cyber-yellow) md:text-base">
         {item.type === "扎心数据" && item.stat ? <span className="cyber-display cyber-text-gradient mr-2 text-2xl font-bold md:text-3xl">{item.stat}</span> : null}
@@ -633,9 +634,9 @@ function FomoFeed(): ReactNode {
 
   return (
     <section id="everyone-saying" className="px-4 py-12">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <div className="mb-8 text-center">
-          <div className="mb-2 text-[10px] tracking-widest uppercase text-(--cyber-muted)">VOICES // 大家都在说什么</div>
+          <div className="mono mb-2 text-[10px] tracking-widest uppercase text-(--cyber-muted)">VOICES // 大家都在说什么</div>
           <h2 className="cyber-display text-2xl font-bold md:text-3xl">
             <span className="cyber-text-gradient">别憋着，说出来</span>
           </h2>
@@ -651,7 +652,7 @@ function FomoFeed(): ReactNode {
 
         <div className="mb-6 flex items-center gap-3" aria-hidden>
           <div className="h-px flex-1 bg-(--cyber-line)" />
-          <span className="text-[10px] tracking-widest text-(--cyber-muted)">FOMO_FEED</span>
+          <span className="mono text-[10px] tracking-widest text-(--cyber-muted)">FOMO_FEED</span>
           <div className="h-px flex-1 bg-(--cyber-line)" />
         </div>
 
@@ -666,7 +667,7 @@ function FomoFeed(): ReactNode {
             <button
               type="button"
               onClick={() => setCount((c) => c + 5)}
-              className="cyber-animate-pulse-glow border border-(--cyber-yellow)/40 px-8 py-2.5 text-xs tracking-wider uppercase text-(--cyber-yellow) transition-all hover:bg-(--cyber-yellow)/10"
+              className="cyber-animate-pulse-glow rounded-full border border-(--cyber-yellow)/40 px-8 py-2.5 text-xs tracking-wider uppercase text-(--cyber-yellow) transition-all hover:bg-(--cyber-yellow)/10"
             >
               MORE
             </button>
@@ -681,19 +682,25 @@ export default function FomoPage(): ReactNode {
   const loaded = useLoaderData() as { payload: FomoPayload | null };
   const [payload, setPayload] = useState(loaded.payload);
   // The number is read again once the browser is in, so a cached server answer does not sit on the
-  // page all day; a browser that cannot reach the api keeps the number the server had.
+  // page all day; a browser that cannot reach the api keeps the number the server had. Off with the
+  // block itself, no request is made.
   useEffect(() => {
+    if (!FOMO.showTodayIndex) return;
     void fetchPayload("/api/fomo/today").then((fresh) => {
       if (fresh) setPayload(fresh);
     });
   }, []);
 
   return (
-    <div className="cyber cyber-noise cyber-animate-flicker mb-6">
+    <div className="cyber cyber-noise cyber-animate-flicker mx-auto mb-14 w-full max-w-[var(--page-max-reading)] lg:mt-3">
       <HeroSection />
       <SectionDivider variant="yellow" />
-      <TodaySection payload={payload} />
-      <SectionDivider variant="cyan" />
+      {FOMO.showTodayIndex ? (
+        <>
+          <TodaySection payload={payload} />
+          <SectionDivider variant="cyan" />
+        </>
+      ) : null}
       <WhatIsFOMO />
       <SectionDivider variant="cyan" />
       <FomoPoll />
@@ -704,7 +711,7 @@ export default function FomoPage(): ReactNode {
       {/* The prototype's sign-off. */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="text-[10px] tracking-[0.3em] text-(--cyber-muted)/40">NIGHT CITY // AI FOMO SYSTEM v2077 // {new Date().getFullYear()}</div>
+          <div className="mono text-[10px] tracking-[0.3em] text-(--cyber-muted)/40">NIGHT CITY // AI FOMO SYSTEM v2077 // {new Date().getFullYear()}</div>
           <div className="mt-4 flex items-center justify-center gap-4 text-xs text-(--cyber-muted)">
             <Link to="/featured" className="underline-offset-4 hover:text-(--cyber-yellow) hover:underline">
               精选

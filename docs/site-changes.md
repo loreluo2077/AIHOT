@@ -712,3 +712,38 @@ npm run build -w @aihot/web && node --test apps/web/tests/*.test.ts     # 改了
   由它继续使用。
 - 指数趋势的历史走势（30 天折线）与主题仪表随页面一起下线，没有迁往别处——要回来时看本节的
   第六批描述（手绘 SVG、`/api/site/topics`）。
+
+## 14. 首页直出与 FOMO 自测改名（2026-10-09，第八批）
+
+使用者两条指令：「AI自测」改名「FOMO自测」；首页去掉滚动触发的显现动画，展示更流畅。
+
+- **改名**：侧栏/我的页/页面 handle/meta/首页 CTA 与页脚、`changelog` 与两份 README 里的「AI 自测」
+  全部改为「FOMO 自测」（quiz 的 `web.tsx`、`web/test.tsx`、fomo 的 `web/fomo.tsx`）。
+  两份测试本身的名字（AI 生存指数 / AI 焦虑速测）不变——测的是 AI 焦虑。
+- **首页去滚动显现**：`web/fomo.tsx` 删掉 `useParallax`（滚动视差）与 `useReveal`
+  （IntersectionObserver 逐块显现）两个钩子——Hero、科普、投票、留言墙、feed 卡全部整页直出；
+  计数动画改为页面打开即跑（`useCountUp` 去掉 visible 参数）。保留的都是非滚动的效果：
+  Hero 轮播、glitch/霓虹闪烁、hover 扫描线、指数条随数据变化的过渡。
+- 顺带把 Hero 的三按钮注释改为两按钮（趋势 CTA 第七批已删）。
+
+## 15. 版式、组件与字体对齐整站（2026-10-09，第九批）
+
+使用者指令：两页的布局和宽度要和整站一致；组件（卡片等）微调成同种风格，颜色和特效不变；字体要用引擎的。
+
+- **宽度与节奏**：两页根面板统一为 `mx-auto w-full max-w-[var(--page-max-reading)] lg:mt-3 mb-14`——
+  与 about/more 等阅读页同一个变量、同样的上下节奏（FOMO自测从 max-w-2xl 的 672px 窄盒改为整站宽；
+  今日FOMO 从宽列公式改阅读页公式，并在面板内加 `lg:mt-3` 顶部间距）。FOMO自测拆两层：外层整站宽面板，
+  内层 `max-w-2xl` 居中答题列（选项按钮不拉满，保持可点的宽度）。
+- **内容加宽一档**（使用者选的）：Hero 与 WhatIsFOMO `max-w-3xl→5xl`，今日指数/投票 `xl→3xl`，留言墙 `2xl→3xl`。
+- **组件几何用引擎令牌**：`.cyber-panel` 弃 eva 的 clip-path 切角，改 `border-radius: var(--radius-card)` +
+  `box-shadow: var(--shadow-card)`（深色主题自动无影），上下渐变发丝线保留；按钮改药丸（`rounded-full`）与
+  瓦片（`rounded-tile`），选项字母框 `rounded-mark`，输入框 `rounded-control`，进度/量尺条 `rounded-full`；
+  `cyber-corner-tl/tr` 两个切角类删除。**颜色、霓虹 hover、glitch/flicker 等特效一律未动。**
+- **字体用引擎的**：`.cyber` 不再覆盖 `font-family`（正文继承引擎 sans）；小字「// 代码标签」（INDEX //、
+  VOICES //、SELF-TEST //、feed 卡标签、时间戳、NIGHT CITY 等）用引擎自己的 `.mono` 类。
+
+## 16. 首页指数区块默认隐藏（2026-10-09，第十批）
+
+使用者：还不想展示指数。`config.ts` 加 `showTodayIndex`（默认 `false`）：首页的今日指数区块、loader 的
+`/api/fomo/today` 请求与浏览器端刷新全部由它门控——关闭时页面零请求；想展示时改回 `true` 即可（区块、
+loader、接口全留着）。首页 meta 与 `CARDS.fomo` 的文案同步去掉「今天的焦虑指数」的说法。
