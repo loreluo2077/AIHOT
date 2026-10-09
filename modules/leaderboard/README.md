@@ -3,7 +3,7 @@
 一个**自建**的模型榜：只读第一方公开数据，页面注明每个数字的来源与版本。它不搬运别家的榜单成品，
 也不替谁跑评测。
 
-- 页面：`/leaderboard`（侧栏「内容」里的一项）
+- 页面：`/leaderboard`（桌面侧栏「内容」里的一项；手机上在「我的」页里）
 
 ## 页面长什么样
 
@@ -65,7 +65,7 @@ JSON 的形状（`models` 与 `scores` 都可以只给一个）：
 ## 打开它
 
 1. 模块的 backend 已经列在 `site/modules/server.ts`，页面在 `site/modules/index.ts`，导航在
-   `site/modules/web.ts`（不想要就删掉对应那一行）。
+   `site/modules/web.ts`（不想要就删掉对应那一行；侧栏与「我的」页里的导航项在 `modules/leaderboard/web.tsx`）。
 2. `site/package.json` 的 `dependencies` 里写 `"@aihot/leaderboard": "*"`；Dockerfile 里有对应的 `COPY`。
 3. 迁移会跟着 `npm run db:migrate`（或 compose 的 setup）一起执行。
 4. 想马上有数据，不用等排程：

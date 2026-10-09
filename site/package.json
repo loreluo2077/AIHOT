@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@aihot/aihot-bridge": "*",
-    "@aihot/leaderboard": "*"
+    "@aihot/fomo": "*",
+    "@aihot/quiz": "*",
+    "@aihot/leaderboard": "*",
+    "@aihot/services": "*"
   }
 }

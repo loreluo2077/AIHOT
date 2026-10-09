@@ -3,13 +3,17 @@
 // price on the same row. It reads this module's own API over HTTP (the web never touches the database)
 // and every number keeps the source it came from. Sorting happens in the browser.
 import { useMemo, useState } from "react";
-import { SITE } from "@aihot/site";
+import { pageMeta } from "@aihot/web/lib/seo";
 import { useLoaderData } from "react-router";
+import type { Screen } from "@aihot/web/components/shell/screens";
 import { LEADERBOARD } from "../config.ts";
 import { prettyModelName } from "../format.ts";
 import type { BenchmarkRow, BenchmarkTable, BenchmarkView, CatalogueRow, LeaderboardPayload, SourceView } from "../types.ts";
 
 const API = process.env.API_BASE_URL ?? "http://127.0.0.1:3001";
+
+/** The phone shell: reached from 我的 (the phone bar has room for one module tab, and the index takes it). */
+export const handle: Screen = { tab: "me", name: "模型榜" };
 
 async function fetchPayload(signal?: AbortSignal): Promise<LeaderboardPayload> {
   const response = await fetch(`${API}/api/leaderboard`, {
@@ -25,10 +29,8 @@ export async function loader({ request }: { request: Request }): Promise<Leaderb
 }
 
 export function meta() {
-  return [
-    { title: `${LEADERBOARD.title} · ${SITE.name}` },
-    { name: "description", content: LEADERBOARD.description },
-  ];
+  // The share card is the site's own (site/site.ts CARDS.leaderboard).
+  return pageMeta({ title: LEADERBOARD.title, description: LEADERBOARD.description, path: "/leaderboard", image: "/og/pages/leaderboard.png" });
 }
 
 function valueOf(row: BenchmarkRow, key: string): number | null {

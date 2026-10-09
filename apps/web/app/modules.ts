@@ -145,6 +145,11 @@ export interface WebModule {
     /** Headers the document's own request to the api carries (the root loader). */
     documentHeaders?: (request: Request) => Record<string, string>;
   };
+  /** The home page (routes/home.tsx): what a module may add to it, ahead of the engine's own blocks. */
+  home?: {
+    /** A compact card above the feed: the thing the site is about today, with a way into its page. */
+    card?: ComponentType;
+  };
   agent?: Part<AgentPart>;
   topicPage?: Part<TopicPagePart>;
   /** Paths of the marks it serves that are drawn in white, for a dark tile (components/BrandMark.tsx). */

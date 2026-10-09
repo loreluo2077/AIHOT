@@ -4,6 +4,7 @@ import type { TimelineResponse } from "@aihot/contracts/site";
 import { cachedPage, loadOr404 } from "../lib/api.server";
 import { pageReuse } from "../lib/page-reuse";
 import { filterParams, itemListLd, listPath, pageMeta, readFilters, siteLd } from "../lib/seo";
+import { webModules } from "../site-modules";
 import type { Screen } from "../components/shell/screens";
 import { Timeline } from "../features/feed/Timeline";
 import { HotTopics } from "../features/feed/HotTopics";
@@ -45,6 +46,9 @@ export default function Home() {
           <SearchField keep={{ category: filters.category }} />
         </div>
       </div>
+
+      {/* The modules' own cards, ahead of the engine's: the index card is the site's daily object. */}
+      {webModules().map((m) => m.home?.card && <m.home.card key={m.name} />)}
 
       {data.hot && <HotTopics entries={data.hot} />}
 

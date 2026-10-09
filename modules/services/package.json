@@ -1,0 +1,16 @@
+{
+  "name": "@aihot/services",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./module.ts",
+    "./web": "./web.tsx",
+    "./config": "./config.ts"
+  },
+  "dependencies": {
+    "@aihot/contracts": "*",
+    "@aihot/site": "*",
+    "@aihot/web": "*"
+  }
+}
