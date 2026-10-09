@@ -1,0 +1,15 @@
+{
+  "name": "@aihot/aihot-bridge",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./server": "./server.ts",
+    "./config": "./config.ts"
+  },
+  "dependencies": {
+    "@aihot/backend": "*",
+    "@aihot/contracts": "*",
+    "@aihot/site": "*"
+  }
+}

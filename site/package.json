@@ -11,5 +11,12 @@
     "./modules/web": "./modules/web.ts",
     "./pages/*": "./pages/*",
     "./brand/*": "./brand/*"
+  },
+  "dependencies": {
+    "@aihot/aihot-bridge": "*",
+    "@aihot/fomo": "*",
+    "@aihot/quiz": "*",
+    "@aihot/leaderboard": "*",
+    "@aihot/services": "*"
   }
 }

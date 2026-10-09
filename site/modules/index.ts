@@ -2,5 +2,9 @@
 // it has an entry for: here for its addresses (module.ts), in server.ts for its backend, in web.ts for its
 // pages' parts. Each list keeps the order its entries appear in on the site.
 import type { ModuleDeclaration } from "@aihot/contracts/modules";
+import fomo from "@aihot/fomo";
+import leaderboard from "@aihot/leaderboard";
+import quiz from "@aihot/quiz";
+import services from "@aihot/services";
 
-export const MODULES: readonly ModuleDeclaration[] = [];
+export const MODULES: readonly ModuleDeclaration[] = [fomo, quiz, leaderboard, services];
