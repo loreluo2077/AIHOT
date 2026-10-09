@@ -5,6 +5,10 @@
 >
 > **2026-10-09 又做了一次改造：站点改成 AI FOMO**（品牌 + 焦虑指数模块 + AI 服务页）。详见第 9 节；
 > 那一节是这次改动唯一需要读的地方，前面 0–8 节说的是此前那次（内容镜像与模型榜），两者互不影响。
+>
+> **2026-10-09 晚些又做了第五批：FOMO 区 EVA 化**——`/fomo` 复刻 eva-s-fomo-finder 首页、`/trends` 换版式、
+> 两个测试合并成一个入口，投票/热词/信号墙删除（含表）。**详见第 11 节**；它部分推翻了第 9、10 节的描述
+> （那两节作为历史记录保留）。
 
 ---
 
@@ -16,7 +20,7 @@
 |---|---|---|
 | **AIHOT 内容镜像**（精选条目 + 正文 + 撤选 + 热点事件 + 日报周报月报） | `modules/aihot-bridge/`（23 个文件） | 已开（`AIHOT_BRIDGE_ENABLED=true`） |
 | **自建模型榜**（评测名次 + 领域分数 + 上线日期 + 价格） | `modules/leaderboard/`（21 个文件） | 已开（每天 06:10 刷新） |
-| **焦虑指数**（当天内容强度 + 读者投票） | `modules/fomo/`（见第 9 节） | 已开（无排程：读取时现算） |
+| **FOMO 区**（赛博首页在根路径 + FOMO趋势 + 合并自测） | `modules/fomo/`、`modules/quiz/`（见第 11–12 节） | 已开（无排程：读取时现算） |
 | **AI 服务页**（介绍 + 跳转外链） | `modules/services/`（见第 9 节） | 已开，`entries` 还是空的 |
 | **引擎插口：导入外部已定事件** | `packages/backend/src/events/import.ts`（143 行） | 被上面第一个模块调用 |
 | **读层：每天发生了什么** | `packages/backend/src/publication/activity.ts` | 被焦虑指数模块调用 |
@@ -615,6 +619,96 @@ npm run build -w @aihot/web && node --test apps/web/tests/*.test.ts     # 改了
 - `/tools` 的 `entries` 仍是空的，等使用者给服务清单。
 - `share.xProfile` 仍是 `null`（「关注 X」按钮不显示）；条款页三项（生效日期/主体/联系方式）仍待填。
 - eva 项目里**没有迁**的：登录/创作者资料（已定不迁）、html2canvas 客户端分享图（引擎 OG 图已够用，想要再迁）、
-  mock 排行榜（假数据）。EVA 皮肤按使用者要求不迁，**别再提**。
+  mock 排行榜（假数据）。EVA 皮肤当时按使用者要求不迁——这条在第五批（§11）被推翻：`/fomo`、`/trends`
+  与合并自测页已套 EVA 皮肤，其余页面保持引擎风格。
 - worker 仍没跑：今天没有新内容时 `/timeline`、指数都是 0——要见真数据开 `COLLECT_ENABLED`/`MODEL_CALLS_ENABLED` 跑 worker（会花模型的钱）。
 - 工作区（dev 分支）依旧一个 commit 都没提交，全部未提交改动 + 本批的都在。
+
+## 11. FOMO 区 EVA 化（2026-10-09，第五批）
+
+使用者推翻了第 10 批「不用 EVA 风」的决定（仅针对 fomo 区）：**`/fomo` 复刻 eva-s-fomo-finder 的首页**，
+趋势页换它的版式，两个测试合并成一个入口，全部套赛博皮肤；同时按使用者决定**删除投票、热词与信号墙**
+（连后端、表与测试）。第 9.2/9.11 与 10.2 里关于投票/信号/热词/EVA 皮肤的描述从本批起作废。
+
+### 11.1 皮肤：`modules/fomo/web/cyber.css`
+
+- eva 的 `cyber-*` 全套（面板切角、文字渐变、网格底、噪点扫描线、霓虹 hover、glitch/flicker/pulse 等
+  keyframes）移植为纯 CSS，**不依赖站点主题 token**：页面根类 `.cyber` 自带固定深色调色板
+  （黄 `#f5d90a` / 青 `#00dcf0` / 品红 `#ff2ba6`），不随读者主题——和首页指数卡同一思路。
+- 半透明色用 Tailwind v4 的任意值 `bg-(--cyber-yellow)/10`（color-mix）写在组件里；类名都在
+  `modules/*/web/**` 下，`app.css` 的 `@source` 本来就扫得到。
+- `@aihot/fomo` 的 `package.json` 导出 `./web/cyber.css`，`sideEffects` 从 `false` 改为 `["*.css"]`
+  （否则构建会把 CSS 当无副作用摇掉）；`modules/quiz` 因此依赖 `@aihot/fomo`。
+- 有 `prefers-reduced-motion` 降级；原型里没用到的 keyframes（scanline、data-stream 等）没搬。
+
+### 11.2 页面
+
+| 页面 | 变化 |
+|---|---|
+| `/fomo` | **整页重写为静态复刻**：Hero（4 张刺激卡轮播、视差、glitch）→ 分割线 → 什么是 AI FOMO → 心情投票（本地假计数）→ 留言墙（localStorage key `aifomo-voices`，不上传）→ 静态 feed（原型 mock-fomo-feed 的 15 条）→ 页脚。CTA：锚点滚动 / `/fomo-test` / `/trends` |
+| `/trends` | 换 eva 版式装**真数据**（loader 不变）：今日指数计数动画 + 分档 + 当日四项统计；主题仪表（`/api/site/topics` 的热度当行业指数，圆环 + 排名条）；指数历史折线（**手绘 SVG，没引 recharts**），7/14/30 天切换 |
+| `/fomo-test` | quiz 模块新 `web/test.tsx`：两个测试一页切换（各记各的答案），结果互导流；旧 `web/{fomo-test,anxiety-test}.tsx` 删除，**`/anxiety-test` 路径取消**（模块路由不支持重定向，旧链接 404） |
+| `/timeline` | 不动（引擎风格） |
+| 首页指数卡 | 去掉投票按钮；说明改为「指数只看今天真正选出的内容」，链接指向 `/trends` |
+| 手机 tab | 「指数」改名「FOMO」（指向的已是赛博首页）；侧栏「焦虑指数」改名「FOMO 首页」 |
+
+### 11.3 删除清单（按仓库规则一次删净）
+
+- 后端：`server.ts` 只剩 `GET /api/fomo/today|insights`；`backend/{store,signal,words}.ts` 删除；
+  `read.ts`/`score.ts` 去掉投票半边（**指数 = 纯内容强度**，`ScoreRules` 无 feelings/halves）；
+  `activity.ts` 的 `dayTopics` 一并删（只剩 fomo 在用）。
+- 页面与管理：`web/admin-signals.tsx`、`module.ts` 的 `adminPages`、`web.tsx` 的 admin 段与
+  `fomoSignals` 计数（后台「内容」组少一行）。
+- 表：迁移 `0114–0117` 逐张 `DROP TABLE IF EXISTS fomo_signal_marks / fomo_signals / fomo_votes /
+  fomo_hotwords`（先 marks 后 signals，外键顺序；每个文件一条语句）。**已存的读者投票/热词/信号数据
+  会丢**，更新说明在 `docs/deploy.md`。
+- config/types 瘦身：`weights/feelings/feelingLabels/trendDays/hotword/signal/share/description` 删；
+  `FomoPayload` 只剩 day/index/band/contentScore/breakdown/generatedAt；insights 去掉 `title`。
+- 测试：`signal-api / signal.standalone / words.standalone` 三个文件删除；`fomo.test.ts` 去掉
+  投票/热词断言；`score.standalone.test.ts` 去掉 readerScore 相关（改断言「指数=内容四舍五入」）。
+- 文案：`site/site.ts` 的 `llmsIntro` 与 `CARDS.fomo`（去掉「读者投票」口径）；`changelog.json` 加一条。
+
+### 11.4 这一跑过的检查
+
+见第 11 节末尾的补充记录（typecheck / npm test / web build + 测试 / 浏览器对照）。
+
+## 12. 导航重排与大事记下线（2026-10-09，第六批）
+
+使用者五条指令：去掉大事记、「趋势」改名 FOMO趋势、「FOMO 首页」改名今日FOMO、**今日FOMO 变成站点根路径**、
+指数分区排到内容上面。
+
+- **首页换根**：`apps/web/app/routes.ts` 的 `index()` 指向 `modules/fomo/web/fomo.tsx`；引擎的精选流
+  整体搬到 **`/featured`**（`routes/home.tsx` 的 base/`meta` 跟着改，`FeedBar` 的 精选|全部 开关指向它）。
+  旧地址由模块重定向接住：`/fomo`→`/`、`/timeline`→`/trends`（都 301，`module.ts` 的 `redirects`）。
+  sitemap 里 `/` 改为静态首页口径、新增 `/featured`（引擎 `sitemap.ts`），`/trends` 由 fomo 的
+  `server.ts` 的 `sitemap.pages` 声明。
+- **侧栏**（`components/shell/nav.ts` `sidebar()`）：模块自己的分区排在引擎「内容」**上面**；点名已有分区
+  （如模型榜点名「内容」）仍然并入而不是新开。现在顺序：指数（今日FOMO/FOMO趋势/FOMO 自测）→ 内容 → 更多。
+- **手机标签栏**（`tabs()`）：模块标签排在最前——今日FOMO(`/`) · 精选(`/featured`) · 热点 · 日报 · 我的。
+- **改名**：侧栏与 tab「FOMO 首页」→「今日FOMO」（handle/meta 同步）；「趋势」→「FOMO趋势」
+  （`trends.tsx` 的 handle/meta、`CARDS.trends.kicker`、首页卡链接文案）。
+- **大事记下线**：删 `web/timeline.tsx` 与其路由/侧栏项；insights 接口从「14 天 + 每天最高分报道」瘦身为
+  **`{ today, trend }`**（FOMO趋势页的今日区块改读 `today`）；`activity.ts` 的 `dayTopReports` 只剩它在用，
+  一并删；`config.ts` 删 `title/timelineDays/timelineTop`，`CARDS.timeline` 删。没有表、没有存档数据。
+- **精选页的指数卡删除**（使用者标注指认）：`web/{home-card,card}.tsx` 与 `web.tsx` 的 `home` 项删；
+  引擎侧本 fork 为它加的 `WebModule.home` 插口（`apps/web/app/modules.ts` + `routes/home.tsx` 的渲染行）
+  没有别的模块用，同一改动删掉。`/api/fomo/today` 作为公开只读接口保留。
+- 文案与文档：`CARDS.fomo.kicker` →「今日FOMO」；fomo/quiz README、`docs/deploy.md`、`HANDOFF.md`、
+  `changelog.json` 同步。
+
+## 13. FOMO趋势并入首页后下线（2026-10-09，第七批）
+
+使用者指令：把 FOMO趋势页里的「今日 FOMO」区块搬到今日FOMO 页面，然后删掉 FOMO趋势。
+
+- **首页变成带数据的页**：`web/fomo.tsx` 加 loader（SSR 读 `${API_BASE_URL}/api/fomo/today`，失败返回
+  null——页面其余部分是静态的，api 挂了首页不能跟着挂；浏览器端挂载后再静默刷一次）；「今日指数」区块
+  （计数动画、分档量尺、当天四项数字）从原趋势页移植，放在 Hero 之后。Hero 的「FOMO 趋势 »」CTA 与
+  页脚的趋势链接删（页脚改为 精选·FOMO 自测）。
+- **FOMO趋势页删除**：`web/trends.tsx`、`module.ts` 的 pages（模块不再有自己的路由页）、`web.tsx` 的
+  侧栏项与 IconTrend；重定向合并为 `/fomo`、`/timeline`、`/trends` 全部 301 → `/`。
+- **insights 整条线删除**：`GET /api/fomo/insights`、`read.ts` 的 `fomoInsightsPayload`、types 的
+  `FomoInsightsPayload / FomoDayView / FomoTrendDayView`、config 的 `trendsDays`、`CARDS.trends`、
+  server 的 sitemap 声明。模块只剩一个接口 `/api/fomo/today`；`activity.ts` 的 `dailyActivity`
+  由它继续使用。
+- 指数趋势的历史走势（30 天折线）与主题仪表随页面一起下线，没有迁往别处——要回来时看本节的
+  第六批描述（手绘 SVG、`/api/site/topics`）。

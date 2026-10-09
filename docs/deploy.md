@@ -79,6 +79,18 @@ docker compose run --rm setup && docker compose up -d
 
 下面按时间从新到旧列出每次更新要注意的事。
 
+#### FOMO趋势并入首页（2026 年 10 月 9 日）
+
+今日FOMO 首页（`/`）中部新增当天指数区块；FOMO趋势页（`/trends`）下线，`/trends` 与旧 `/timeline` 一样 301 到 `/`。`GET /api/fomo/insights` 接口删除（其数据由 `/api/fomo/today` 覆盖首页所需）；首页改为服务端渲染当天指数，api 不可用时首页照常显示、指数区块显示占位。没有数据库迁移，没有新增环境变量。
+
+#### 首页换根与大事记下线（2026 年 10 月 9 日）
+
+站点根路径 `/` 换成 fomo 的赛博首页（今日FOMO），引擎的精选流搬到 `/featured`（其顶部的深色指数卡随之删除）；「趋势」改名「FOMO趋势」。大事记页（`/timeline`）下线。旧地址 `/fomo` → `/`、`/timeline` → `/trends` 都是 301，收藏和分享出去的链接仍然能用。`/api/fomo/insights` 的返回从 `{ trend, days[] }` 改为 `{ today, trend }`（`days` 里每天的 top 报道不再提供）。没有数据库迁移，没有新增环境变量。
+
+#### FOMO 区 EVA 化（2026 年 10 月 9 日）
+
+`/fomo` 换成静态赛博首页、`/trends` 换版式、两个测试合并成 `/fomo-test` 一个入口（`/anxiety-test` 路径取消，旧链接 404）。读者投票、热词与社区信号随旧页删除：`POST /api/fomo/{vote,hotword,signal,agree,report}` 与 `/api/admin/fomo/*` 接口、`/admin/fomo-signals` 后台页都没了，指数改为纯内容强度。迁移 `0114–0117` 逐张删除 `fomo_signal_marks`、`fomo_signals`、`fomo_votes`、`fomo_hotwords` 四张表——**已存的读者投票、补充热词与信号内容会一并丢掉，要留的先备份**。没有新增环境变量。
+
 #### 原帖展示与引擎同步（2026 年 10 月 6 日）
 
 没有新增必填环境变量或数据库迁移。自己维护 `site/site.ts` 的站点需补上 `REPORTS.quiet`，可对照示范配置：日报时段内有资料经过评判、但没有新大事时照常出刊，用这两句做标题与导语；导语的 `{start}`、`{end}` 是时段起止。没有任何资料经过评判仍算采集或判断失败，不伪装成平静的一天。

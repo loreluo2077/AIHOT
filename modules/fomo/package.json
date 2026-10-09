@@ -2,12 +2,13 @@
   "name": "@aihot/fomo",
   "private": true,
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": ["*.css"],
   "exports": {
     ".": "./module.ts",
     "./server": "./server.ts",
     "./web": "./web.tsx",
-    "./config": "./config.ts"
+    "./config": "./config.ts",
+    "./web/cyber.css": "./web/cyber.css"
   },
   "dependencies": {
     "@aihot/backend": "*",

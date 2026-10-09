@@ -9,8 +9,9 @@
 ## 0. 一句话现状
 
 AIHOT（`dev` 分支，HEAD `aa51e10`）已改造成 **AI FOMO** 站点：引擎内容管道（采集→模型筛选→日报/热点/主题）
-之上，用引擎自己的风格落地了 eva-s-fomo-finder 的核心功能——焦虑指数+投票、大事记、趋势、两个心理测验、
-共鸣墙、热词、AI 服务页。**全部改动仍未提交**（25+ 路径，见第 9 节），测试 732/732 全绿，站点本机可跑。
+之上落地了 eva-s-fomo-finder 的核心功能。**第五批（同日晚些）又把 FOMO 区 EVA 化**：`/fomo` 复刻 eva 首页
+（赛博皮肤）、`/trends` 换版式、两个测试合并成 `/fomo-test` 一个入口；投票/热词/信号墙已删（表也删了，
+指数=纯内容强度）。**全部改动仍未提交**，详见文末「第五批增补」与 `docs/site-changes.md` 第 11 节。
 
 ---
 
@@ -25,8 +26,9 @@ AIHOT（`dev` 分支，HEAD `aa51e10`）已改造成 **AI FOMO** 站点：引擎
 工作区根还有：`aihot-backup-2026-10-09/` 与 `.tar.gz`（回滚前的完整备份，第 8 节）、`MERGE-PLAN.md`（旧方案，过时）。
 
 **历史脉络别再绕**：上一任把 `ai-fomo/` 原型迁进来 → 使用者说"不对" → 问清楚后真相是使用者真正想迁的是
-`eva-s-fomo-finder` 的功能，且**不要 EVA 皮肤、保持引擎风格、不迁登录、只中文**。本批已按此做完并回滚重建过一次。
-**别再提议 EVA 风 / Supabase / 迁登录 / 双语，使用者已明确否了**（见 `docs/site-changes.md` 第 10.5 节）。
+`eva-s-fomo-finder` 的功能，当时定的是**不要 EVA 皮肤、保持引擎风格、不迁登录、只中文**。本批已按此做完并回滚重建过一次。
+**注意：第五批已对 fomo 区推翻「不要 EVA 皮肤」**（使用者新的明确要求）——`/fomo`、`/trends` 与合并自测页
+套了 EVA 皮肤，其余页面仍保持引擎风格。Supabase / 迁登录 / 双语仍然没戏。
 
 ---
 
@@ -34,18 +36,16 @@ AIHOT（`dev` 分支，HEAD `aa51e10`）已改造成 **AI FOMO** 站点：引擎
 
 | 页面 | 模块 | 数据 |
 |---|---|---|
-| `/` 首页 | 引擎精选流 + `modules/fomo` 的深色指数卡（`WebModule.home.card` 插口，引擎 `apps/web/app/modules.ts` + `routes/home.tsx`） | 卡片客户端 fetch `/api/fomo/today`，可直投 |
-| `/fomo` 焦虑指数 | `modules/fomo` | 指数=60% 内容强度+40% 读者情绪；表 `fomo_votes/hotwords/signals/signal_marks` |
-| `/timeline` 大事记 | `modules/fomo/web/timeline.tsx` | `GET /api/fomo/insights`：每天指数+选出数+当日最高分报道（读层 `activity.ts` 的 `dayTopReports`） |
-| `/trends` 趋势 | `modules/fomo/web/trends.tsx` | 同 insights + 引擎 `/api/site/topics`（主题热度 TOP 12） |
-| `/fomo-test`、`/anxiety-test` 测验 | **`modules/quiz`**（新） | 纯前端：题库在 `data/`，浏览器算分，**零存储零接口** |
+| `/` 今日FOMO | `modules/fomo`（第五–七批：复刻 eva 首页、坐上根路径、并入今日指数区块） | 指数：SSR 读 `/api/fomo/today`（失败不挂页）；投票/留言墙是本地演示，零上传 |
+| `/featured` 精选 | 引擎（原 `/`，第六批让位） | 引擎精选流（原顶部指数卡第六批已删） |
+| `/fomo-test` 自测 | **`modules/quiz`**（第五批两测合一） | 纯前端：题库在 `data/`，浏览器算分，**零存储零接口**；`/anxiety-test` 路径已取消 |
+| `/trends` FOMO趋势 | **第七批已下线**（今日区块并入 `/`，趋势折线与主题仪表随之删除） | `/fomo`、`/timeline`、`/trends` 全部 301 → `/` |
 | `/tools` AI 服务 | `modules/services`（路径已从 `/services` 改名） | 纯配置：`config.ts` 的 `entries`（**空，等使用者给清单**） |
 | `/leaderboard` 模型榜 | `modules/leaderboard`（已提交的旧模块） | 每日 06:10 刷新 |
 | `/hot` `/daily` `/topics` `/story` 等 | 引擎自带 | 内容管道 |
-| `/admin/fomo-signals` | `modules/fomo` 后台 | 共鸣墙的恢复/删除，角标 `fomoSignals` |
 
-导航：桌面侧栏「指数」分区（焦虑指数/大事记/趋势/FOMO 测试/焦虑测试）+「内容」（引擎+AI 服务+模型榜）+「更多」；
-手机标签栏第五格「指数」。
+导航：桌面侧栏「指数」分区排在「内容」**上面**（今日FOMO / FOMO 自测）→「内容」（精选在 `/featured`）→「更多」；
+手机标签栏：今日FOMO(`/`) · 精选 · 热点 · 日报 · 我的。
 
 ---
 
@@ -159,9 +159,51 @@ node scripts/smoke.ts --base http://127.0.0.1:3000
 | 想知道什么 | 看哪里 |
 |---|---|
 | 本批（eva 迁入+回滚重建）全部细节 | `docs/site-changes.md` 第 10 节 |
+| **第五批（FOMO 区 EVA 化 + 功能删除）** | `docs/site-changes.md` 第 11 节、`docs/deploy.md` 的「FOMO 区 EVA 化」 |
 | 之前批次（品牌/指数/服务页/首页卡/修 process.env bug） | `docs/site-changes.md` 第 9 节 |
-| 指数算法/表/限流 | `modules/fomo/README.md` |
+| 指数算法/皮肤/静态页取舍 | `modules/fomo/README.md` |
 | 测验题库与改题 | `modules/quiz/README.md` |
 | AI 服务页加条目 | `modules/services/README.md` |
 | 引擎约定（模块/迁移/读层/检查） | `AGENTS.md`、`docs/{architecture,customize,deploy,selection}.md` |
 | 功能来源原型 | `../eva-s-fomo-finder/`（只读；页面在 `src/pages`，数据接口在 `src/hooks/use-content.ts` 与 `supabase/migrations`） |
+
+---
+
+## 11. 第五批增补（2026-10-09，FOMO 区 EVA 化）
+
+> 下面这些是对上文（写于第四批之后）的修正，正文未改的历史描述以本节为准。
+
+- **换机了**：仓库现在在 Windows 上开发（`C:\luoer\ai-fomo\AIHOT`，pwsh + Node 24 直跑）。
+  第 3 节的 macOS 专属路径（`/tmp/n24`、`/tmp/pgdata`、npm cache 参数）只对旧机器成立；
+  Windows 上 npm install 无需 cache 参数，数据库连接串看 `.env` 的 `DATABASE_URL`。
+- **改动**：`/fomo` 复刻 eva 首页（`modules/fomo/web/fomo.tsx` 重写 + 新 `web/cyber.css` 皮肤）；
+  `/trends` 换 eva 版式装真数据；quiz 两页合并为 `web/test.tsx`（`/fomo-test`，`/anxiety-test` 取消）。
+  皮肤由 `@aihot/fomo` 导出（`sideEffects: ["*.css"]`），quiz 依赖它。
+- **删除**：投票/热词/信号墙全部（接口、`admin-signals` 页、`fomoSignals` 角标、`store/signal/words.ts`、
+  `dayTopics`），迁移 `0114–0117` DROP 四张表（读者数据会丢，见 `docs/deploy.md`）；指数=纯内容强度。
+- **指数口径变了**：config/types/score/read 全部瘦身；首页指数卡无投票按钮。
+- **待提交路径又多了**：第五批涉及 `modules/{fomo,quiz}` 十余个文件、`activity.ts`、四个迁移、
+  `site/{site.ts,changelog.json}`、5 个文档。提交前跑第 4 节检查（Windows 下 `DATABASE_URL` 环境变量
+  用 `$env:DATABASE_URL=...` 设置）。
+
+## 12. 第六批增补（2026-10-09，首页换根 + 导航重排）
+
+- **`/` 现在是今日FOMO**（fomo 模块的赛博首页）；引擎精选流搬到 `/featured`（改了 `routes.ts`、
+  `routes/home.tsx`、`FeedBar`、sitemap）。旧地址 301：`/fomo`→`/`、`/timeline`→`/trends`（模块 redirects）。
+- **侧栏顺序**：模块分区（指数）在「内容」上面；**手机 tab**：今日FOMO(`/`) · 精选 · 热点 · 日报 · 我的
+  （`components/shell/nav.ts`）。「趋势」→「FOMO趋势」、「FOMO 首页」→「今日FOMO」。
+- **大事记已删**（页面、路由、insights 的 `days`、`activity.ts` 的 `dayTopReports`、`CARDS.timeline`）。
+  insights 现在返回 `{ today, trend }`。
+- **精选页顶部的深色指数卡也删了**（`web/{home-card,card}.tsx`；引擎侧本 fork 加的 `WebModule.home`
+  插口没人用了，`modules.ts` 与 `routes/home.tsx` 的对应代码一并删）。`/api/fomo/today` 作为公开接口保留。
+
+## 13. 第七批增补（2026-10-09，FOMO趋势并入首页后下线）
+
+- **`/` 中部现在是当天指数区块**（Hero 之后）：SSR loader 读 `/api/fomo/today`，失败返回 null——首页是
+  静态的，api 挂了不能连坐；浏览器挂载后静默刷一次。计数动画/分档量尺/当天四项数字从趋势页原样移植。
+- **`/trends` 整页删除**：趋势折线（30 天 SVG）与主题仪表（`/api/site/topics`）没有迁往别处；
+  insights 接口、`fomoInsightsPayload`、`FomoInsightsPayload/FomoDayView/FomoTrendDayView`、
+  `trendsDays`、`CARDS.trends` 全删。模块只剩 `/api/fomo/today` 一个接口。
+- 旧地址 `/fomo`、`/timeline`、`/trends` 一律 301 → `/`。侧栏「指数」分区只剩 今日FOMO + FOMO 自测（quiz 的）。
+- 全量 `npm test` 在这台 Windows 机上跑不完是环境问题：测试框架用 `pg_dump` 克隆库、
+  `openssl` 生成证书、SIGTERM 测试只在 POSIX 下有效——单独跑模块测试是绿的（见第 11 节检查记录的方式）。

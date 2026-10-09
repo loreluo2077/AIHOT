@@ -27,7 +27,9 @@ async function build(at: Date): Promise<string> {
   const [latestDaily] = await sql<{ key: string | null; t: Date | null }[]>`SELECT max(key) AS key, max(generated_at) AS t FROM reports WHERE kind = 'daily'`;
   const now = latestItem?.t ?? new Date();
   entries.push(
-    { loc: "/", lastmod: now, changefreq: "hourly", priority: 1 },
+    // This site's root is the fomo homepage; the engine's featured feed keeps its own address.
+    { loc: "/", changefreq: "weekly", priority: 1 },
+    { loc: "/featured", lastmod: now, changefreq: "hourly", priority: 0.9 },
     { loc: "/all", lastmod: now, changefreq: "hourly", priority: 0.9 },
     { loc: "/daily", lastmod: latestDaily?.t, changefreq: "daily", priority: 0.9 },
     { loc: "/hot", lastmod: now, changefreq: "hourly", priority: 0.9 },

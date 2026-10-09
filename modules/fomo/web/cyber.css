@@ -1,0 +1,231 @@
+/* The fomo module's own skin: a fixed cyberpunk dark (yellow / cyan / magenta on near-black), migrated
+   from the eva-s-fomo-finder prototype this module's pages are modelled on. It deliberately ignores the
+   reader's theme — like the dark index card, these pages are the module's instrument panel, not paper.
+   Every class is cyber-prefixed so nothing can collide with the engine's, and the quiz module's
+   self-test page imports this file too (see the package's exports). */
+
+/* The panel the three pages sit in: fixed dark ground, one hairline frame, corners cut like a screen. */
+.cyber {
+  --cyber-bg: #0a0d12;
+  --cyber-panel: #12161f;
+  --cyber-line: #2a3140;
+  --cyber-ink: #e8eae6;
+  --cyber-muted: #8b95a8;
+  --cyber-yellow: #f5d90a;
+  --cyber-cyan: #00dcf0;
+  --cyber-magenta: #ff2ba6;
+  position: relative;
+  overflow: clip;
+  border: 1px solid var(--cyber-line);
+  border-radius: var(--radius-card, 12px);
+  background: var(--cyber-bg);
+  color: var(--cyber-ink);
+  /* The prototype set the whole page in a mono; on system fonts the Latin and digits stay mono and
+     CJK falls to the reader's default, which reads the same at these sizes. */
+  font-family: var(--font-mono, ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace);
+}
+
+/* The prototype's display face (Rajdhani) becomes the sans, bold and tracked — close enough at distance. */
+.cyber-display {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The prototype's panel: cut corners with a hairline gradient at top and bottom. */
+.cyber-panel {
+  position: relative;
+  overflow: hidden;
+  background: var(--cyber-panel);
+  border: 1px solid var(--cyber-line);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+.cyber-panel::before,
+.cyber-panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+}
+.cyber-panel::before {
+  top: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cyber-yellow) 60%, transparent), color-mix(in srgb, var(--cyber-cyan) 30%, transparent), transparent);
+}
+.cyber-panel::after {
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyber-magenta) 30%, transparent), color-mix(in srgb, var(--cyber-yellow) 60%, transparent));
+}
+
+/* The two headline gradients: yellow → cyan, and the hot one yellow → magenta. */
+.cyber-text-gradient {
+  background: linear-gradient(135deg, var(--cyber-yellow), var(--cyber-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cyber-text-gradient-hot {
+  background: linear-gradient(135deg, var(--cyber-yellow), var(--cyber-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* The hero's grid, and the fine scanlines laid over the whole page. */
+.cyber-grid-bg {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--cyber-yellow) 3%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--cyber-yellow) 3%, transparent) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.cyber-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 40;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, color-mix(in srgb, var(--cyber-yellow) 10%, transparent) 2px, color-mix(in srgb, var(--cyber-yellow) 10%, transparent) 4px);
+}
+
+/* Cut corners for buttons and badges. */
+.cyber-corner-tl {
+  clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
+}
+.cyber-corner-tr {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+
+/* Neon hover glows, one per colour. */
+.cyber-hover-yellow,
+.cyber-hover-cyan,
+.cyber-hover-magenta {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.cyber-hover-yellow:hover {
+  box-shadow: 0 0 15px color-mix(in srgb, var(--cyber-yellow) 40%, transparent), 0 0 30px color-mix(in srgb, var(--cyber-yellow) 15%, transparent);
+  border-color: color-mix(in srgb, var(--cyber-yellow) 60%, transparent);
+}
+.cyber-hover-cyan:hover {
+  box-shadow: 0 0 15px color-mix(in srgb, var(--cyber-cyan) 40%, transparent), 0 0 30px color-mix(in srgb, var(--cyber-cyan) 15%, transparent);
+  border-color: color-mix(in srgb, var(--cyber-cyan) 60%, transparent);
+}
+.cyber-hover-magenta:hover {
+  box-shadow: 0 0 15px color-mix(in srgb, var(--cyber-magenta) 40%, transparent), 0 0 30px color-mix(in srgb, var(--cyber-magenta) 15%, transparent);
+  border-color: color-mix(in srgb, var(--cyber-magenta) 60%, transparent);
+}
+
+/* A glitch jolt on hover, and a scan line sweeping a button on hover. */
+.cyber-glitch-hover:hover {
+  animation: cyber-glitch 0.3s linear;
+}
+.cyber-scan-hover {
+  position: relative;
+  overflow: hidden;
+}
+.cyber-scan-hover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyber-yellow) 60%, transparent), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.cyber-scan-hover:hover::after {
+  opacity: 1;
+  animation: cyber-hover-scan 0.8s linear infinite;
+}
+
+/* Neon text on hover, and the small lift. */
+.cyber-neon-text-hover {
+  transition: text-shadow 0.3s ease;
+}
+.cyber-neon-text-hover:hover {
+  text-shadow: 0 0 7px color-mix(in srgb, var(--cyber-yellow) 80%, transparent), 0 0 20px color-mix(in srgb, var(--cyber-yellow) 40%, transparent);
+}
+.cyber-lift-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cyber-lift-hover:hover {
+  transform: translateY(-4px);
+}
+
+/* The animations the pages use; the prototype's unused ones (scanline, data-stream…) were left out. */
+@keyframes cyber-glitch {
+  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  20% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 2px); }
+  40% { clip-path: inset(50% 0 20% 0); transform: translate(3px, -1px); }
+  60% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 1px); }
+  80% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+}
+@keyframes cyber-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+  92% { opacity: 0.96; }
+  94% { opacity: 1; }
+}
+@keyframes cyber-pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px color-mix(in srgb, var(--cyber-yellow) 20%, transparent), inset 0 0 5px color-mix(in srgb, var(--cyber-yellow) 5%, transparent); }
+  50% { box-shadow: 0 0 20px color-mix(in srgb, var(--cyber-yellow) 40%, transparent), inset 0 0 10px color-mix(in srgb, var(--cyber-yellow) 10%, transparent); }
+}
+@keyframes cyber-warning-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes cyber-border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes cyber-neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { text-shadow: 0 0 7px color-mix(in srgb, var(--cyber-yellow) 60%, transparent), 0 0 20px color-mix(in srgb, var(--cyber-yellow) 30%, transparent); }
+  20%, 24%, 55% { text-shadow: none; }
+}
+@keyframes cyber-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cyber-hover-scan {
+  0% { top: -2px; }
+  100% { top: calc(100% + 2px); }
+}
+
+.cyber-animate-flicker {
+  animation: cyber-flicker 4s ease-in-out infinite;
+}
+.cyber-animate-glitch {
+  animation: cyber-glitch 0.3s linear;
+}
+.cyber-animate-pulse-glow {
+  animation: cyber-pulse-glow 2s ease-in-out infinite;
+}
+.cyber-animate-warning-flash {
+  animation: cyber-warning-flash 1s ease-in-out infinite;
+}
+.cyber-animate-border-flow {
+  background-size: 200% 200%;
+  animation: cyber-border-flow 3s ease infinite;
+}
+.cyber-animate-neon-flicker {
+  animation: cyber-neon-flicker 3s ease-in-out infinite;
+}
+.cyber-animate-fade-in {
+  animation: cyber-fade-in 0.5s ease-out;
+}
+
+/* The engine's own reduced-motion guard, scoped to this skin. */
+@media (prefers-reduced-motion: reduce) {
+  .cyber,
+  .cyber *,
+  .cyber *::before,
+  .cyber *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

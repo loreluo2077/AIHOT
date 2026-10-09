@@ -13,7 +13,10 @@ const modulePages: RouteConfigEntry[] = MODULES.flatMap((m) =>
 const moduleAdminPages: RouteConfigEntry[] = MODULES.flatMap((m) => (m.adminPages ?? []).map((p) => page(m.name, p)));
 
 export default [
-  index("routes/home.tsx"),
+  // This site's own homepage: the fomo module's panel (今日FOMO). The engine's featured feed keeps its
+  // place in the navigation at /featured.
+  index(file("fomo", "web/fomo.tsx")),
+  route("featured", "routes/home.tsx"),
   route("all", "routes/all.tsx"),
   route("all/search-busy", "routes/search-busy.tsx", { id: "all-search-busy" }),
   route("search-busy", "routes/search-busy.tsx", { id: "search-busy" }),
