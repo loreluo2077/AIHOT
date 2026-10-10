@@ -254,17 +254,9 @@ function Catalogue({ rows, source }: { rows: CatalogueRow[]; source: { label: st
   );
 }
 
-export default function LeaderboardPage() {
-  const payload = useLoaderData() as LeaderboardPayload;
-
+export function LeaderboardContent({ payload }: { payload: LeaderboardPayload }) {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-xl font-semibold">{payload.title}</h1>
-        <p className="max-w-3xl text-sm text-ink-3">{payload.description}</p>
-        <p className="text-xs text-ink-4">数据更新于 {formatDate(payload.generatedAt)}</p>
-      </header>
-
+    <>
       <ul className="flex flex-col gap-1 rounded-lg border border-line px-4 py-3">
         {payload.sources.map((source: SourceView) => (
           <li key={source.key} className="text-xs text-ink-3">
@@ -294,6 +286,20 @@ export default function LeaderboardPage() {
       ))}
 
       {payload.catalogue.length > 0 ? <Catalogue rows={payload.catalogue} source={payload.catalogueSource} /> : null}
+    </>
+  );
+}
+
+export default function LeaderboardPage() {
+  const payload = useLoaderData() as LeaderboardPayload;
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-xl font-semibold">{payload.title}</h1>
+        <p className="max-w-3xl text-sm text-ink-3">{payload.description}</p>
+        <p className="text-xs text-ink-4">数据更新于 {formatDate(payload.generatedAt)}</p>
+      </header>
+      <LeaderboardContent payload={payload} />
     </div>
   );
 }

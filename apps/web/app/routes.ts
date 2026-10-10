@@ -17,6 +17,7 @@ export default [
   // place in the navigation at /featured.
   index(file("fomo", "web/fomo.tsx")),
   route("featured", "routes/home.tsx"),
+  route("curated", "routes/curated.tsx"),
   route("all", "routes/all.tsx"),
   route("all/search-busy", "routes/search-busy.tsx", { id: "all-search-busy" }),
   route("search-busy", "routes/search-busy.tsx", { id: "search-busy" }),

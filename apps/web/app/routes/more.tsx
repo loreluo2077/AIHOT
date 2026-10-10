@@ -10,7 +10,7 @@ import { webModules } from "../site-modules";
 import { pageMeta } from "../lib/seo";
 import { useStarred } from "../lib/local-state";
 import { ThemeSwitch } from "../components/shell/ThemeSwitch";
-import { IconBookmark, IconChevronRight, IconGrid, IconHeart, IconMessage, IconMoon, IconPlug, IconSparkles } from "../components/icons";
+import { IconBookmark, IconChevronRight, IconClock, IconGrid, IconHeart, IconMessage, IconMoon, IconPlug, IconSparkles } from "../components/icons";
 
 export const handle: Screen = { tab: "me", name: "我的" };
 
@@ -86,6 +86,7 @@ export default function MorePage() {
           </li>
         </Group>
         <Group title="工具与入口">
+          <RowLink row={{ to: "/daily", label: "日报", icon: <IconClock size={20} />, detail: "含周报、月报" }} />
           {tools().map((r) => (
             <RowLink key={r.to} row={r} />
           ))}

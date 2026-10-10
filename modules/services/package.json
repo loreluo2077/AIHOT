@@ -6,6 +6,7 @@
   "exports": {
     ".": "./module.ts",
     "./web": "./web.tsx",
+    "./web/tools": "./web/tools.tsx",
     "./config": "./config.ts"
   },
   "dependencies": {

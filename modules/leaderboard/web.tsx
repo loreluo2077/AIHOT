@@ -15,6 +15,5 @@ function IconChart({ size = 18 }: { size?: number }): ReactNode {
 
 export default defineWebModule({
   name: "leaderboard",
-  sidebar: { section: "内容", items: [{ to: "/leaderboard", label: "模型榜", icon: IconChart }] },
   tools: [{ to: "/leaderboard", label: "模型榜", icon: <IconChart size={18} /> }],
 });

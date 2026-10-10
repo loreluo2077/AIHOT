@@ -14,6 +14,5 @@ function IconPlug({ size = 18 }: { size?: number }): ReactNode {
 
 export default defineWebModule({
   name: "services",
-  sidebar: { section: "内容", items: [{ to: "/tools", label: "AI 服务", icon: IconPlug }] },
-  tools: [{ to: "/tools", label: "AI 服务", icon: <IconPlug size={18} /> }],
+  tools: [{ to: "/tools", label: "工具", icon: <IconPlug size={18} /> }],
 });

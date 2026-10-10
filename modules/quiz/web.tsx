@@ -19,7 +19,7 @@ export default defineWebModule({
   name: "quiz",
   sidebar: {
     section: "指数",
-    items: [{ to: "/fomo-test", label: "FOMO 自测", icon: IconTarget }],
+    items: [{ to: "/fomo-test", label: "测试", icon: IconTarget }],
   },
-  tools: [{ to: "/fomo-test", label: "FOMO 自测", icon: <IconTarget size={18} /> }],
+  tools: [{ to: "/fomo-test", label: "测试", icon: <IconTarget size={18} /> }],
 });

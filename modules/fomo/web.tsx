@@ -18,8 +18,8 @@ export default defineWebModule({
   // section (the quiz module).
   sidebar: {
     section: "指数",
-    items: [{ to: "/", label: "今日FOMO", icon: IconPulse, end: true }],
+    items: [{ to: "/", label: "FOMO", icon: IconPulse, end: true }],
   },
   // The module's tab is the site's root, so the tab bar leads with it (components/shell/nav.ts).
-  tabs: [{ key: "fomo", to: "/", label: "今日FOMO", icon: IconPulse }],
+  tabs: [{ key: "fomo", to: "/", label: "FOMO", icon: IconPulse }],
 });

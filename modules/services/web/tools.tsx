@@ -12,14 +12,9 @@ export function meta() {
   return pageMeta({ title: SERVICES.title, description: SERVICES.description, path: "/tools", image: "/og/pages/tools.png" });
 }
 
-export default function ServicesPage() {
+export function ServicesContent() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-xl font-semibold">{SERVICES.title}</h1>
-        <p className="text-sm text-ink-3">{SERVICES.description}</p>
-      </header>
-
+    <>
       {SERVICES.entries.length === 0 ? (
         <p className="rounded-lg border border-line px-4 py-6 text-sm text-ink-3">
           还没有配置。往 <code className="rounded bg-bg-muted px-1.5 py-0.5">modules/services/config.ts</code> 的{" "}
@@ -48,6 +43,18 @@ export default function ServicesPage() {
       )}
 
       <p className="text-xs text-ink-4">{SERVICES.note}</p>
+    </>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-xl font-semibold">{SERVICES.title}</h1>
+        <p className="text-sm text-ink-3">{SERVICES.description}</p>
+      </header>
+      <ServicesContent />
     </div>
   );
 }

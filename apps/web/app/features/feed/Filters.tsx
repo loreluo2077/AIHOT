@@ -21,7 +21,8 @@ function hrefWith(base: string, params: URLSearchParams, patch: Record<string, s
   sp.delete("page");
   sp.delete("cursor");
   const s = sp.toString();
-  return s ? `${base}?${s}` : base;
+  if (!s) return base;
+  return `${base}${base.includes("?") ? "&" : "?"}${s}`;
 }
 
 /**
@@ -143,11 +144,25 @@ export function ActiveFilters({ base, category, channel, tag }: { base: string; 
 }
 
 /** Phones: the magnifier in a bar; the search opens over the page with the keyboard up. */
-function SearchButton() {
+export function SearchButton() {
   return (
     <BarButton label="搜索" onClick={(event) => openSearch("", event.currentTarget)}>
       <IconSearch size={21} />
     </BarButton>
+  );
+}
+
+/** A phone-bar filter trigger for article feeds embedded outside the normal 动态 page. */
+export function ArticleFilterButton({ base, category, channel }: { base: string; category: CategoryKey | null; channel: ChannelKey }) {
+  const [sheet, setSheet] = useState(false);
+  const active = filterKey(category, channel);
+  return (
+    <>
+      <BarButton label={active === "all" ? "筛选" : "筛选（已选）"} on={active !== "all"} onClick={() => setSheet(true)}>
+        <IconFilter size={21} />
+      </BarButton>
+      <FilterSheet open={sheet} onClose={() => setSheet(false)} base={base} active={active} />
+    </>
   );
 }
 

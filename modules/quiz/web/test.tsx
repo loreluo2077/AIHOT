@@ -8,8 +8,8 @@ import "@aihot/fomo/web/cyber.css";
 import { DIMENSION_LABELS, QUIZ_QUESTIONS, QUIZ_LEVELS, calcDimensionScores, calcTotalScore, getLevel, type QuizLevel } from "../data/fomo-quiz.ts";
 import { ANXIETY_QUESTIONS, calcAnxietyScore, getAnxietyLevel, type AnxietyLevel } from "../data/anxiety-quiz.ts";
 
-/** The phone shell: this page sits under the fomo tab, and a back button to it reads FOMO 自测. */
-export const handle: Screen = { tab: "fomo", name: "FOMO 自测" };
+/** The phone shell: this page sits under the fomo tab, and a back button to it reads 测试. */
+export const handle: Screen = { tab: "fomo", name: "测试" };
 
 export function meta() {
   return pageMeta({
