@@ -94,6 +94,18 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # The compose file has no database of its own: the job's service container is the database, reached
+    # from the app container through the runner host (host.docker.internal, mapped via host-gateway in
+    # docker-compose.yml).
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: aihot_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 5s --health-retries 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -105,16 +117,22 @@ jobs:
           node scripts/init-env.ts --llm-key ci-not-a-real-key
           # No outside calls in CI: nothing is collected and no model is asked.
           sed -i 's/^COLLECT_ENABLED=.*/COLLECT_ENABLED=false/; s/^MODEL_CALLS_ENABLED=.*/MODEL_CALLS_ENABLED=false/' .env
+          # The database is this job's PostgreSQL service container; the app container reaches it as
+          # host.docker.internal (extra_hosts in docker-compose.yml) on the runner's mapped port.
+          sed -i 's|^DATABASE_URL=.*|DATABASE_URL=postgres://postgres:ci@host.docker.internal:5432/aihot_ci|' .env
+          # docker-compose.yml joins an external "1panel-network" (the deployment host's own); create it
+          # on the throwaway runner so compose can attach to it.
+          docker network create 1panel-network
           # The smoke check reaches the site by its compose service name.
           echo "MCP_ALLOWED_HOSTS=web" >> .env
       - name: Build and start with docker compose
         run: docker compose up -d --build
       - name: Smoke check
         run: |
-          for i in $(seq 1 90); do curl -fsS -o /dev/null http://127.0.0.1:3000/api/health 2>/dev/null && break; sleep 2; done
+          for i in $(seq 1 90); do curl -fsS -o /dev/null http://127.0.0.1:3100/api/health 2>/dev/null && break; sleep 2; done
           docker compose ps
-          docker compose run --rm --no-deps --entrypoint node setup scripts/smoke.ts --base http://web:3000
-          docker compose exec -T db psql -U aihot -d aihot -Atc "select count(*) from sources" | grep -qx "$(node -p "require('./industry/sources.json').sources.length")"
+          docker compose run --rm --no-deps --entrypoint node app scripts/smoke.ts --base http://web:3000
+          docker compose run --rm --no-deps --entrypoint sh app -c 'psql "$DATABASE_URL" -Atc "select count(*) from sources"' | tr -d '\r' | grep -qx "$(node -p "require('./industry/sources.json').sources.length")"
       - name: Logs
         if: failure()
         run: docker compose logs --tail 80

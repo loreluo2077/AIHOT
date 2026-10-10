@@ -1,105 +1,78 @@
-# docker compose up -d --build     → http://localhost:3000   (the admin is at /admin)
-# docker compose --profile https up -d --build   → HTTPS for SITE_DOMAIN through Caddy
-name: aihot
+# docker compose up -d --build     → web on 127.0.0.1:${PORT:-3100} (the admin is at /admin)
+# Two containers: app (api+worker together; deploy/app-entrypoint.sh runs migrations, then both
+# processes) and web (SSR only, no database access or secrets — see AGENTS.md). Postgres is NOT
+# bundled: point DATABASE_URL in .env at this host's existing instance. HTTPS and the public domain are
+# this host's own reverse proxy (not Caddy); web only binds the loopback port the proxy forwards to.
+name: aifomo
 
-x-app: &app
+x-image: &image
   build: .
-  image: aihot-app
+  image: aifomo-app
   restart: unless-stopped
-
-x-backend: &backend
-  <<: *app
-  env_file: .env
-  environment: &backend-env
-    NODE_ENV: production
-    DATABASE_URL: postgres://aihot:${POSTGRES_PASSWORD:-aihot}@db:5432/aihot
-    AIHOT_DATA_DIR: /data
-    API_BASE_URL: http://api:3001
-    # No proxy in front limits pushes to /api/ingest/items: the api does (per client and minute; 0 turns it off).
-    INGEST_RATE_LIMIT: ${INGEST_RATE_LIMIT:-10}
-  volumes:
-    - data:/data
-  depends_on:
-    db:
-      condition: service_healthy
+  # Matches this host's other compose stacks (json-file with a cap, so a long-running worker/web
+  # can't fill the disk) and keeps `docker logs` timestamps in the same timezone as the rest of the box.
+  logging:
+    driver: json-file
+    options:
+      max-size: "50m"
+      max-file: "3"
 
 services:
-  db:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: aihot
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aihot}
-      POSTGRES_DB: aihot
-    volumes:
-      - db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aihot -d aihot"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-
-  # Applies the database migrations and seeds the demo sources, then exits.
-  setup:
-    <<: *backend
-    restart: "no"
-    command: ["sh", "-c", "node scripts/migrate.ts && node scripts/seed.ts"]
-
-  api:
-    <<: *backend
-    command: ["node", "apps/api/src/main.ts"]
-    environment:
-      <<: *backend-env
-      API_HOST: 0.0.0.0
-      API_PORT: "3001"
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-
-  worker:
-    <<: *backend
-    command: ["node", "apps/worker/src/main.ts"]
-    # On stop the worker lets a paid call in flight finish (STOP_TIMEOUT_MS, 195 s); Docker's default
-    # 10 s would kill it mid-call and leave "outcome unknown" receipts that are paid for again.
-    stop_grace_period: 210s
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-
-  web:
-    <<: *app
-    command: ["node", "apps/web/server.ts"]
-    # SSR reads the API over HTTP; backend credentials and stored files stay in api/worker.
+  # api (HTTP :3001, internal-only) + worker (jobs, schedules) in one container: same image, same
+  # deployment, same secrets and database access. deploy/app-entrypoint.sh migrates and seeds once at
+  # boot (replacing the separate one-shot "setup" container), then starts both and forwards docker
+  # stop's SIGTERM to both so the worker can finish an in-flight paid call (up to ~195s; see
+  # stop_grace_period below and apps/worker/src/main.ts).
+  app:
+    <<: *image
+    container_name: aifomo-app
+    env_file: .env
     environment:
       NODE_ENV: production
-      API_BASE_URL: http://api:3001
-      SITE_URL: ${SITE_URL:-http://localhost:3000}
+      TZ: Asia/Shanghai
+      AIHOT_DATA_DIR: /data
+      API_HOST: 0.0.0.0
+      API_PORT: "3001"
+      # No proxy in front limits pushes to /api/ingest/items: the api does (per client and minute; 0 turns it off).
+      INGEST_RATE_LIMIT: ${INGEST_RATE_LIMIT:-10}
+    entrypoint: ["/usr/bin/tini", "--"]
+    command: ["bash", "deploy/app-entrypoint.sh"]
+    volumes:
+      - data:/data
+    # For a PostgreSQL listening on the host itself: DATABASE_URL's host is then host.docker.internal.
+    # Unused (and harmless) when the database is reached over 1panel-network below.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stop_grace_period: 210s
+    networks:
+      - default
+      - 1panel-network
+
+  web:
+    <<: *image
+    container_name: aifomo-web
+    # No env_file here on purpose: web never gets DATABASE_URL or any backend secret, only the handful
+    # of settings below. SSR reads the api over HTTP (api.server.ts), it never touches the database.
+    environment:
+      NODE_ENV: production
+      TZ: Asia/Shanghai
+      API_BASE_URL: http://app:3001
+      SITE_URL: ${SITE_URL:-http://localhost:3100}
       TRUST_PROXY: ${TRUST_PROXY:-false}
       AIHOT_RELEASE: ${AIHOT_RELEASE:-}
       WEB_HOST: 0.0.0.0
       WEB_PORT: "3000"
+    command: ["node", "apps/web/server.ts"]
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-127.0.0.1:3100}:3000"
     depends_on:
-      api:
-        condition: service_started
+      - app
 
-  caddy:
-    image: caddy:2-alpine
-    profiles: ["https"]
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
-    volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy:/data
-    depends_on:
-      - web
+networks:
+  # This host's existing network (1Panel): lets the app container reach the Postgres container already
+  # running there by its container/service name, without publishing a new port.
+  1panel-network:
+    external: true
 
 volumes:
-  db: {}
   data: {}
-  caddy: {}

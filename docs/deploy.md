@@ -1,21 +1,33 @@
 # 部署
 
+> **本 fork 的 Docker 编排和上游不一样**：不自带数据库容器，也不自带 Caddy；用两个容器（`app` 跑
+> api+worker，`web` 跑网页），数据库连到部署机器上已有的 PostgreSQL。本节按这个 fork 的实际情况写；
+> 其他章节（更新、备份、花多少钱……）除非特别说明，仍适用。
+
 ## 用 Docker（推荐）
 
-需要一台装了 Docker（带 Compose）的机器。云服务器建议至少 2 核、4 GB 内存，构建镜像时要用到。
+需要一台装了 Docker（带 Compose）的机器，以及一个这台机器上已经能连到的 PostgreSQL（16 或 17；
+`docker-compose.yml` 不再自带数据库容器）。云服务器建议至少 2 核、4 GB 内存，构建镜像时要用到。
 
 ```bash
-git clone https://github.com/KKKKhazix/AIHOT.git myhot
+git clone <这个 fork 的地址> myhot
 cd myhot
 node scripts/init-env.ts --llm-key <你的模型 API Key>
 ```
 
-`init-env.ts` 会生成 `.env`，填好随机密钥和管理员密码，并把密码打印一次。机器上没有 Node 的话，把 `.env.example` 复制成 `.env`，自己填 `ADMIN_PASSWORD`（至少 12 位）、`SESSION_SECRET`、`IMG_PROXY_SIGN_SECRET`、`POSTGRES_PASSWORD`（各用 `openssl rand -hex 32` 生成）和 `LLM_API_KEY`。
+`init-env.ts` 会生成 `.env`，填好随机密钥和管理员密码，并把密码打印一次。机器上没有 Node 的话，把
+`.env.example` 复制成 `.env`，自己填 `ADMIN_PASSWORD`（至少 12 位）、`SESSION_SECRET`、
+`IMG_PROXY_SIGN_SECRET`（各用 `openssl rand -hex 32` 生成）、`LLM_API_KEY`，以及下面这一项：
 
-启动前检查 `.env` 的 `SITE_URL`：本机试用保留 `http://localhost:3000`；部署到服务器时改成读者实际访问的地址。例如通过服务器 IP 访问时（把示例 IP 换成自己的）：
+```bash
+# 指向这台机器上已有的 PostgreSQL；app 容器要能连到这个地址（见下方「数据库」）。
+DATABASE_URL=postgres://用户名:密码@主机:5432/数据库名
+```
+
+启动前检查 `.env` 的 `SITE_URL`：本机试用保留 `http://localhost:3100`；部署到服务器时改成读者实际访问的地址。例如通过服务器 IP 访问时（把示例 IP 换成自己的）：
 
 ```dotenv
-SITE_URL=http://192.0.2.10:3000
+SITE_URL=http://192.0.2.10:3100
 ```
 
 RSS、分享链接、站点地图和 Agent Markdown 中的绝对链接都使用这个值，不会随浏览器访问的地址自动改变。使用域名和 HTTPS 时按下方「配域名和 HTTPS」设置。
@@ -26,9 +38,18 @@ RSS、分享链接、站点地图和 Agent Markdown 中的绝对链接都使用�
 docker compose up -d --build
 ```
 
-启动后打开 `http://服务器地址:3000`，后台在 `/admin`，用管理员密码登录。第一次启动会导入示范信源，一两分钟后开始出现内容；第一次导入的一百多条资料大约半小时处理完（每条都要预筛、评分、结构化、写标题摘要，再归组）。
+启动后打开 `http://服务器地址:3100`，后台在 `/admin`，用管理员密码登录。第一次启动会导入示范信源，一两分钟后开始出现内容；第一次导入的一百多条资料大约半小时处理完（每条都要预筛、评分、结构化、写标题摘要，再归组）。
 
-`docker compose` 会起五个容器：`db`（PostgreSQL 17）、`setup`（每次启动先跑数据库迁移和种子数据，然后退出）、`api`、`worker`（抓取、模型处理、定时任务）、`web`（网页）。`web` 只接收网站地址、API 地址等网页配置，通过 HTTP 读取 API；数据库、模型和管理员密钥，以及数据卷，只交给后端容器。
+`docker compose` 会起两个容器：`app`（api + worker 在同一容器里：先跑数据库迁移和种子数据，再同时起 HTTP 接口与采集/模型/定时任务）、`web`（网页，只接收网站地址、API 地址等网页配置，通过 HTTP 读取 api）。数据库、模型和管理员密钥，以及数据卷，只交给 `app` 容器；`web` 容器完全不读 `.env`，拿不到任何密钥。
+
+### 数据库
+
+这个 fork 要求 `DATABASE_URL` 指向一个已经存在、`app` 容器能连到的 PostgreSQL：
+
+- **同一台机器上另一个 Docker 网络里的实例**：`docker-compose.yml` 里把那个网络填进 `networks.<名字>.external: true`，再让 `app` 服务加入它，`DATABASE_URL` 的主机名填那个网络里数据库的服务名或容器名（不是 `127.0.0.1`，也不用发布端口）。
+- **宿主机上监听 `127.0.0.1` 的实例**：在 `app` 服务加 `extra_hosts: ["host.docker.internal:host-gateway"]`，`DATABASE_URL` 的主机名填 `host.docker.internal`。
+- 数据库要能被当前连接的角色建表（迁移会 `CREATE EXTENSION IF NOT EXISTS pg_trgm`，这是受信任扩展，角色是该库的 owner 即可）。
+- 这个数据库不由本仓库的 compose 管理：备份、版本升级、是否持久化都是你自己维护的那套。
 
 ### 在中国大陆的服务器上
 
@@ -39,22 +60,16 @@ docker compose up -d --build
 
 ### 配域名和 HTTPS
 
+这个 fork 的 compose 不带 Caddy：HTTPS 和域名由部署机器上已有的反向代理（Nginx、openresty……）负责。
 先把域名解析到服务器，然后在 `.env` 里设置：
 
 ```bash
 SITE_URL=https://example.com
-SITE_DOMAIN=example.com
-PORT=127.0.0.1:3000        # 3000 端口只给本机的 Caddy 用，不直接对外
-TRUST_PROXY=true           # 访客地址从 Caddy 转来的请求头里读
+PORT=127.0.0.1:3100        # 只给本机的反向代理用，不直接对外
+TRUST_PROXY=true           # 访客地址从反向代理转来的请求头里读
 ```
 
-再用带 HTTPS 的方式启动，Caddy 会自动申请和续期证书：
-
-```bash
-docker compose --profile https up -d --build
-```
-
-已经有 Nginx 的话，不用 Caddy，把站点反向代理到 `http://127.0.0.1:3000`，带上 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`，并在 `.env` 里设 `TRUST_PROXY=true`。`SITE_URL` 一定要写成读者实际访问的地址：生成的链接、RSS、分享图和 MCP 都用它。
+反向代理把站点转给 `http://127.0.0.1:3100`（`web` 容器），带上 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`。`SITE_URL` 一定要写成读者实际访问的地址：生成的链接、RSS、分享图和 MCP 都用它。
 
 MCP 默认接受 `SITE_URL` 的主机以及 `localhost`、`127.0.0.1`、`[::1]`。额外主机用 `MCP_ALLOWED_HOSTS` 配置，以逗号分隔，例如 `extra.example:8443,[2001:db8::1]`。主机名不区分大小写，IPv6 必须加方括号；可带 0–65535 的十进制端口，匹配时忽略端口。包含路径、用户信息或非法端口的配置不会生效。`127.1` 等别名需要明确列入；此配置只影响 Host 校验，不扩大浏览器 Origin 许可。
 
@@ -64,18 +79,17 @@ MCP 默认接受 `SITE_URL` 的主机以及 `localhost`、`127.0.0.1`、`[::1]`�
 
 正文原生视频修复会为已有可用视频补播放控件，并去掉空播放器，不写回文章、不调用模型。旧版清洗时已经丢弃的媒体地址无法从存档恢复；升级不批量重新抽取，已有成功正文会跳过抽取，内容哈希相同时重新抽取也可能保留原 HTML。后续新正文按[信源说明](sources.md)保留原生视频，文件继续由浏览器直连原站，签名地址可能过期。
 
-先按下方 [备份](#备份) 一节备份。构建完成后停止旧服务，再运行迁移和新版服务：
+先按下方 [备份](#备份) 一节备份。构建完成后停止旧服务，再运行迁移和新版服务——`bash deploy/update.sh` 按这个顺序做好了：
 
 ```bash
-git pull
-docker compose build
-docker compose stop api worker web
-docker compose run --rm setup && docker compose up -d
+bash deploy/update.sh
 ```
 
-迁移成功后再启动服务；迁移失败时先查看错误，不要继续启动。使用 HTTPS 配置的站点继续保留 `--profile https`。旧的 API 和 worker 要在迁移前停下：迁移可能删表删列，旧代码还在跑会出错；正常关闭 worker 会等进行中的付费调用收尾（最长三分多钟）。非 Docker 部署也按“备份、构建、停止 API/worker/web、迁移（`scripts/migrate.ts`）、种子数据（`scripts/seed.ts`）、启动”的顺序更新。
+它依次做：`git pull`、`docker compose build`、停掉旧的 `app`/`web`、起一次性的迁移检查（`app` 容器自己的入口脚本在启动时跑 `scripts/migrate.ts` 和 `scripts/seed.ts`，失败就不会往下起 api/worker）、`docker compose up -d`。
 
-新迁移遇到长期占锁会报出文件名和等待超时，先处理占锁事务，再重跑 setup，不要跳过迁移或改写迁移账本。并发索引创建中断可能留下无效索引：核实报错中的对象后，用 `DROP INDEX CONCURRENTLY <索引名>` 清理该失败索引再重跑；有效但定义不同的同名索引须先核对差异。这些保护不改变上述 Docker 更新顺序，跨旧版本升级仍可能执行历史上的破坏性迁移。
+迁移成功后再启动服务；迁移失败时先查看错误，不要继续启动。旧的 API 和 worker 要在迁移前停下：迁移可能删表删列，旧代码还在跑会出错；正常关闭 worker 会等进行中的付费调用收尾（最长三分多钟）。非 Docker 部署也按“备份、构建、停止 API/worker/web、迁移（`scripts/migrate.ts`）、种子数据（`scripts/seed.ts`）、启动”的顺序更新。
+
+新迁移遇到长期占锁会报出文件名和等待超时，先处理占锁事务，再重跑 `deploy/update.sh`（或手动 `docker compose up -d`，`app` 容器会重新尝试迁移），不要跳过迁移或改写迁移账本。并发索引创建中断可能留下无效索引：核实报错中的对象后，用 `DROP INDEX CONCURRENTLY <索引名>` 清理该失败索引再重跑；有效但定义不同的同名索引须先核对差异。这些保护不改变上述 Docker 更新顺序，跨旧版本升级仍可能执行历史上的破坏性迁移。
 
 下面按时间从新到旧列出每次更新要注意的事。
 
@@ -199,24 +213,24 @@ MCP 的 `subscriptions/listen` 现在立即返回 HTTP 404 和 JSON-RPC `-32601 
 
 ### 备份
 
-在 `.env` 里配置 `DB_BACKUP_STORE_*`（任何 S3 兼容的对象存储），每天 04:10 自动备份到那里。`DB_BACKUP_STORE_SECRET_ID`、`DB_BACKUP_STORE_SECRET_KEY`、`DB_BACKUP_STORE_BUCKET`、`DB_BACKUP_STORE_REGION` 四项都要填；不填 `DB_BACKUP_STORE_DOMAIN` 时按腾讯云 COS 拼地址（`<桶名>.cos.<地域>.myqcloud.com`），用其他 S3 兼容存储时，把这个存储桶的访问域名（含桶名，例如 AWS S3 的 `<桶名>.s3.<地域>.amazonaws.com`）填进 `DB_BACKUP_STORE_DOMAIN`。
+在 `.env` 里配置 `DB_BACKUP_STORE_*`（任何 S3 兼容的对象存储），每天 04:10 自动备份到那里。`DB_BACKUP_STORE_SECRET_ID`、`DB_BACKUP_STORE_SECRET_KEY`、`DB_BACKUP_STORE_BUCKET`、`DB_BACKUP_STORE_REGION` 四项都要填；不填 `DB_BACKUP_STORE_DOMAIN` 时按腾讯云 COS 拼地址（`<桶名>.cos.<地域>.myqcloud.com`），用其他 S3 兼容存储时，把这个存储桶的访问域名（含桶名，例如 AWS S3 的 `<桶名>.s3.<地域>.amazonaws.com`）填进 `DB_BACKUP_STORE_DOMAIN`。这个备份走的是 `app` 容器里的 `pg_dump`（随镜像的 PostgreSQL 17 客户端），数据库版本比它新时客户端可能连不上，备份前先确认版本兼容。
 
-一次完整备份包含同一时间戳的数据库 `.dump` 和文件包 `.tar.gz`，文件名取自数据库名：Docker 里数据库叫 `aihot`，所以是 `aihot-<时间>.dump` 和 `aihot-files-<时间>.tar.gz`。文件包保留 `uploads/` 以及仍存本地的 `feedback-screenshots/`，不包含图片缓存或本地备份目录。已经转发到飞书的图片只保留数据库中的外部引用，文件包不保存飞书上的图片。
+一次完整备份包含同一时间戳的数据库 `.dump` 和文件包 `.tar.gz`，文件名取自数据库名。文件包保留 `uploads/` 以及仍存本地的 `feedback-screenshots/`，不包含图片缓存或本地备份目录。已经转发到飞书的图片只保留数据库中的外部引用，文件包不保存飞书上的图片。
 
 恢复时同时取回这一对文件：使用与数据库版本兼容的 `pg_restore` 将 `.dump` 恢复到空数据库，再把文件包解压到数据目录根目录（Docker 中为 `/data`，非 Docker 使用 `AIHOT_DATA_DIR`，默认 `.data`），保留包内的子目录结构，并确保运行进程可读取这些文件。只恢复数据库不能找回仍由 `local:` 引用的反馈截图；旧备份中没有包含的文件也无法凭数据库引用恢复。
 
-下面的手动导出只包含数据库，不包含上述附件目录：
+下面的手动导出只包含数据库，不包含上述附件目录（数据库不是这份 compose 管理的，直接对着它跑 `pg_dump`，不是 `docker compose exec`）：
 
 ```bash
-docker compose exec -T db pg_dump -U aihot aihot | gzip > myhot-$(date +%F).sql.gz
+pg_dump "$DATABASE_URL" | gzip > myhot-$(date +%F).sql.gz
 ```
 
-数据都在三个 Docker 卷里：`db`（数据库）、`data`（上传的图片、图片缓存、本地备份）、`caddy`（证书）。`docker compose down` 不会删除它们；`docker compose down -v` 会。
+`data` 这个 Docker 卷存着上传的图片、图片缓存和本地备份；`docker compose down` 不会删除它，`docker compose down -v` 会。数据库由你自己那套设施管理，备份、保留策略不归这份 compose。
 
 ### 看日志
 
 ```bash
-docker compose logs -f --tail 100 api worker web
+docker compose logs -f --tail 100 app web
 ```
 
 后台的“运行”页能看到每个定时任务最近的结果，“信源”页能看到每个信源的抓取状况。

@@ -14,7 +14,6 @@ const text = readFileSync(".env.example", "utf8")
   .replace(/^ADMIN_PASSWORD=$/m, `ADMIN_PASSWORD=${password}`)
   .replace(/^SESSION_SECRET=$/m, `SESSION_SECRET=${randomBytes(32).toString("hex")}`)
   .replace(/^IMG_PROXY_SIGN_SECRET=$/m, `IMG_PROXY_SIGN_SECRET=${randomBytes(32).toString("hex")}`)
-  .replace(/^POSTGRES_PASSWORD=$/m, `POSTGRES_PASSWORD=${randomBytes(18).toString("hex")}`)
   .replace(/^LLM_API_KEY=$/m, `LLM_API_KEY=${llmKey}`);
 writeFileSync(".env", text, { mode: 0o600 });
 console.log("已生成 .env。");
