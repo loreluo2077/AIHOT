@@ -219,10 +219,8 @@ function HeroSection(): ReactNode {
   };
 
   return (
-    <section className="relative flex min-h-[calc(100dvh-120px)] items-center justify-center overflow-hidden">
-      {/* The grid the content floats over. */}
+    <section className="fomo-hero relative flex min-h-[calc(100dvh-120px)] items-center justify-center overflow-hidden">
       <div className="cyber-grid-bg absolute inset-0 opacity-60" aria-hidden />
-      {/* The diagonal hairlines in the corners. */}
       <div className="pointer-events-none absolute right-0 top-0 size-[300px] opacity-20" aria-hidden>
         <div className="absolute right-10 top-10 h-px w-full origin-right rotate-[-35deg] bg-gradient-to-l from-(--cyber-yellow)/60 to-transparent" />
         <div className="absolute right-10 top-20 h-px w-[200px] origin-right rotate-[-35deg] bg-gradient-to-l from-(--cyber-cyan)/40 to-transparent" />
@@ -282,7 +280,6 @@ function HeroSection(): ReactNode {
           </Link>
         </div>
 
-        {/* The decorative line under the calls to action. */}
         <div className="mt-16 flex items-center justify-center gap-3" aria-hidden>
           <div className="h-px w-20 bg-gradient-to-r from-transparent to-(--cyber-yellow)/40" />
           <div className="size-1.5 bg-(--cyber-yellow)/60" />
@@ -290,6 +287,7 @@ function HeroSection(): ReactNode {
           <div className="size-1.5 bg-(--cyber-cyan)/60" />
           <div className="h-px w-20 bg-gradient-to-l from-transparent to-(--cyber-cyan)/40" />
         </div>
+
       </div>
     </section>
   );
@@ -329,7 +327,7 @@ function WhatIsFOMO(): ReactNode {
   return (
     <section className="px-4 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-10 text-center">
+        <div className="fomo-explainer mb-10 text-center">
           <div className="mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)">EXPLAIN // 这不是你的错</div>
           <h2 className="cyber-display text-2xl font-bold md:text-4xl">
             <span className="text-(--cyber-ink)">什么是 </span>
@@ -692,7 +690,7 @@ export default function FomoPage(): ReactNode {
   }, []);
 
   return (
-    <div className="cyber cyber-noise cyber-animate-flicker mx-auto mb-14 w-full max-w-[var(--page-max-reading)] lg:mt-3">
+    <div className="cyber mx-auto mb-14 w-full max-w-[var(--page-max-reading)] lg:mt-3">
       <HeroSection />
       <SectionDivider variant="yellow" />
       {FOMO.showTodayIndex ? (

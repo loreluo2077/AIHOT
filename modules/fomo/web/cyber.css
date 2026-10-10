@@ -221,3 +221,140 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The FOMO page belongs to the same editorial product as the feeds. Keep its warm, reassuring voice,
+   but inherit the site's theme tokens instead of imposing a separate fixed neon interface. */
+.cyber {
+  --cyber-bg: var(--bg);
+  --cyber-panel: var(--surface);
+  --cyber-line: var(--line);
+  --cyber-ink: var(--ink);
+  --cyber-muted: var(--ink-4);
+  --cyber-yellow: var(--accent);
+  --cyber-cyan: var(--accent-ink);
+  --cyber-magenta: var(--hot);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.cyber-panel {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+.cyber-panel::before,
+.cyber-panel::after {
+  display: none;
+}
+
+.cyber-text-gradient,
+.cyber-text-gradient-hot {
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: currentcolor;
+  background-clip: initial;
+  color: var(--accent);
+}
+
+.cyber-grid-bg,
+.cyber-noise::before {
+  display: none;
+}
+
+.cyber-hover-yellow:hover,
+.cyber-hover-cyan:hover,
+.cyber-hover-magenta:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.cyber-animate-flicker,
+.cyber-animate-pulse-glow,
+.cyber-animate-neon-flicker {
+  animation: none;
+}
+
+/* The first screen is the page's signature moment. It intentionally keeps the dark instrument-panel
+   treatment in both reader themes; the editorial sections below it continue to follow the site theme. */
+.fomo-hero {
+  /* In light mode, use the main dark palette's raised surface instead of its deepest page ground:
+     the hero remains a distinct moment without reading as a hard black interruption. */
+  --cyber-bg: #202a2f;
+  --cyber-panel: #263238;
+  --cyber-line: rgba(255, 255, 255, 0.08);
+  --cyber-ink: #e7eceb;
+  --cyber-muted: #89979d;
+  --cyber-yellow: #f5d90a;
+  --cyber-cyan: #00dcf0;
+  --cyber-magenta: #ff2ba6;
+  background: var(--cyber-bg);
+  color: var(--cyber-ink);
+}
+
+.fomo-hero .cyber-grid-bg {
+  display: block;
+  opacity: 0.7;
+}
+
+.fomo-hero .cyber-text-gradient {
+  background: linear-gradient(135deg, var(--cyber-yellow), var(--cyber-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: inherit;
+}
+
+.fomo-hero .cyber-animate-pulse-glow {
+  animation: cyber-pulse-glow 2s ease-in-out infinite;
+}
+
+.fomo-hero .cyber-animate-neon-flicker {
+  animation: cyber-neon-flicker 3s ease-in-out infinite;
+}
+
+/* The definition is the page's emotional anchor. Give it a distinct but editorial card treatment so
+   readers can immediately understand what the page is about before moving into the examples. */
+.fomo-explainer {
+  position: relative;
+  overflow: hidden;
+  padding: 1.75rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--amber) 55%, var(--line));
+  border-radius: var(--radius-card, 12px);
+  background: linear-gradient(135deg, var(--amber-soft), var(--surface) 58%);
+  box-shadow: var(--shadow-card);
+}
+
+.fomo-explainer::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3.25rem;
+  height: 3px;
+  content: "";
+  background: var(--amber);
+  transform: translateX(-50%);
+}
+
+.fomo-explainer h2 {
+  color: var(--ink);
+}
+
+.fomo-explainer .cyber-text-gradient {
+  color: var(--accent);
+}
+
+@media (min-width: 768px) {
+  .fomo-explainer {
+    padding: 2rem 2.5rem;
+  }
+}
+
+/* Keep the same yellow treatment in dark mode, with a slightly softer tone against the dark ground. */
+[data-theme="dark"] .fomo-hero {
+  --cyber-bg: #13191c;
+  --cyber-panel: #1a2226;
+  --cyber-yellow: #f2cd45;
+}

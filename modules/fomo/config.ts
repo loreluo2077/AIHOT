@@ -23,7 +23,7 @@ export const FOMO = {
    * Off for now — the owner has not wanted to show the number yet; flip to true to bring the block
    * back (the loader, the section and the api behind it all stay).
    */
-  showTodayIndex: false,
+  showTodayIndex: true,
   /** What each counted part weighs inside the index; the four must add up to 1. */
   factors: { selected: 0.4, stories: 0.25, firstParty: 0.2, score: 0.15 } satisfies FomoFactorWeights,
   factorLabels: {
