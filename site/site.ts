@@ -35,9 +35,9 @@ export const SITE = {
   /** 反馈表单邮箱框里的提示。 */
   feedbackEmailHint: "留下邮箱，我们可以回信联系你",
   /** 一句话介绍：搜索引擎、分享卡片、RSS、llms.txt 会用。 */
-  description: `从一批 AI 信源里挑出值得看的动态，把同一件事的多篇报道归到一起，${EDITION_WHEN.daily} 出一份日报；再用一个每日焦虑指数标出今天的热闹里有多少是真的。`,
+  description: `从一批 AI 信源里挑出值得看的动态，把同一件事的多篇报道归到一起，${EDITION_WHEN.daily} 出一份日报。`,
   /** llms.txt 里一句话介绍下面的一段详细介绍（选填）。 */
-  llmsIntro: `AI 一天一个样，真正值得花时间的只有几条。AI FOMO 把信源收全、把同一件事归到一起、把营销稿和重复转发挡在外面，让读者一眼看清行业节奏；每天的焦虑指数只由当天真正选出的内容强度算出，不是投票玩具。`,
+  llmsIntro: `AI 一天一个样，真正值得花时间的只有几条。AI FOMO 把信源收全、把同一件事归到一起、把营销稿和重复转发挡在外面，让读者一眼看清行业节奏。`,
   /** 一行小字：分享图、海报下方。 */
   tagline: "看清 AI 的节奏，不被焦虑带着走",
   /** 搜索引擎读到的关键词（首页结构化数据）。 */
@@ -63,7 +63,7 @@ export const SITE = {
   /** 对外联系邮箱（选填）：llms.txt 和给 Agent 的使用说明里会写。 */
   contactEmail: null as string | null,
   /** 关于页底部的一行小字（选填）。 */
-  footerNote: "由 AIHOT 开源框架驱动",
+  footerNote: null as string | null,
   /** 中国大陆网站的 ICP 备案号（选填），填了就显示在侧栏底部和“我的”页底部，并链接到工信部备案系统。 */
   icp: null as string | null,
   /** 源码的 GitHub 仓库地址（选填），填了就在侧栏底部和“我的”页底部显示“GitHub 开源”。 */
@@ -134,15 +134,15 @@ export const ABOUT = {
   /** 页面描述（搜索结果、分享卡片）。 */
   description: `关于 ${SITE.name}：${SITE.description}`,
   /** 大标题：第一行正常颜色，第二行强调色。 */
-  headline: ["AI 每天都像要变天，", "值得你花时间的只有几条。"] as [string, string],
+  headline: ["AI 一更新，就像要错过什么。", "其实不用都追上。"] as [string, string],
   /** 标题下面的一段话。{sources} 会换成实时的信源数（两边自动加空格，所以 {sources} 两边不写空格）；统计没取到时换成 sourcesFallback。 */
-  lead: `${SITE.name} 替你盯着{sources}个信源：抓取、归并、打分、精选，${EDITION_WHEN.daily} 出一份日报；再用一个每日焦虑指数，标出今天的热闹里有多少是真的。免费，不用注册。`,
+  lead: `${SITE.name} 替你盯着{sources}个信源：抓取、归并、打分、精选，${EDITION_WHEN.daily} 出一份日报。免费，不用注册。`,
   sourcesFallback: "十几",
   /** 信源河动画下面的四个环节。 */
   steps: {
-    collect: "官方博客、媒体和个人的订阅源都在看；更新越勤的源看得越勤，最快 15 分钟看一次。",
+    collect: "官方博客、媒体账号和个人的订阅，都是这里的信源。",
     store: "抓到的都存下来，同一件事的报道归到一起，热点榜就是从这里算出来的。",
-    select: `模型先看是不是这个行业的事、有没有实际信息，再写中文标题、摘要和${ITEM_COPY.reasonLabel}；营销稿和重复转发进不来。`,
+    select: `模型先看是不是 ${SITE.subject} 相关、有没有实际信息，再写中文标题、摘要和${ITEM_COPY.reasonLabel}；营销稿和重复转发进不来。`,
     publish: `${EDITION_WHEN.daily} 出日报，${EDITION_WHEN.weekly} 出周报，${EDITION_WHEN.monthly} 出月报。`,
   },
   /**

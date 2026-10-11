@@ -279,8 +279,8 @@ export default function AboutPage() {
       </p>
 
       <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-[12.5px] text-ink-4">
-        <span>{SITE.footerNote}</span>
-        <nav className="flex gap-5" aria-label="规则与隐私">
+        {SITE.footerNote && <span>{SITE.footerNote}</span>}
+        <nav className="ml-auto flex gap-5" aria-label="规则与隐私">
           <Link
             viewTransition
             id={ABOUT.termsAnchor ?? undefined}

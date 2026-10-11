@@ -781,3 +781,21 @@ loader、接口全留着）。首页 meta 与 `CARDS.fomo` 的文案同步去掉
   （`@aihot/web/components/icons` 的 `IconBolt / IconSparkles / IconClock`，走 `text-(--cyber-yellow)`，
   即 accent），与模型榜等模块引用站点图标的方式一致。留言卡与心情选择的 emoji 属于读者自己选的内容，
   这次没动。
+
+## 18. 关于页文案调整（2026-10-12）
+
+使用者要求调整关于页文案。文案都在 `site/site.ts`（`ABOUT` 段，另有 `SITE.description`、`SITE.llmsIntro`、
+`SITE.footerNote`）：
+
+- **删掉过时的「每日焦虑指数」承诺**：这个指数现在没有任何页面在展示（首页那块在 §12/§16 拿掉，FOMO趋势页
+  §13 下线，`/api/fomo/today` 前端没人调用），所以 `ABOUT.lead`、`SITE.description` 里那半句一并删掉；
+  `SITE.llmsIntro` 里还有同一句，顺手一起删了（三处一致）。
+- **大标题**：`AI 每天都像要变天，值得你花时间的只有几条。` → `AI 一更新，就像要错过什么。` /
+  `其实不用都追上。`（第二行是强调色那行）。
+- **四个环节的说法**：精选那句 `是不是这个行业的事` → `是不是 ${SITE.subject} 相关`（即「AI 相关」）；
+  采集那句原来写的是框架自己的抓取行为（`更新越勤的源看得越勤，最快 15 分钟看一次`），但本站内容目前是从
+  AIHOT 镜像进来的，改成 `官方博客、媒体账号和个人的订阅，都是这里的信源。`，不再声称本站按频率抓取。
+  （想换回框架原本的说法，把这一句还原即可。）
+- **页脚署名去掉**：`SITE.footerNote` 从「由 AIHOT 开源框架驱动」改为 `null`（`docs/customize.md` 写明
+  这一项「可以留也可以删」）；`apps/web/app/routes/about.tsx` 的页脚改为按需渲染、导航靠右——**这是本 fork
+  改到引擎 `apps/web` 的一处（两行）**，记录了方便与上游合并比对。
