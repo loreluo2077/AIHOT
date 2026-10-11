@@ -322,26 +322,3 @@
     padding: 2rem 2.5rem;
   }
 }
-
-/* Keep the same yellow treatment in dark mode, with a slightly softer tone against the dark ground. */
-[data-theme="dark"] .fomo-hero {
-  --cyber-bg: #13191c;
-  --cyber-panel: #1a2226;
-  --cyber-yellow: #f2cd45;
-}
-
-/* Wide screens seat the definition card inside the hero band (fomo.tsx). Its paper colours must not
-   dissolve into the dark ground, so its own --cyber-* text tokens are re-anchored to the theme's
-   paper ones, its ground becomes solid surface, and the neon gradient the hero re-enables for
-   .cyber-text-gradient is switched back off inside the card. Phones keep the card on paper below. */
-.fomo-hero .fomo-explainer {
-  --cyber-ink: var(--ink);
-  --cyber-muted: var(--ink-3);
-  --cyber-cyan: var(--accent);
-  background: var(--surface);
-}
-
-.fomo-hero .fomo-explainer .cyber-text-gradient {
-  background: none;
-  -webkit-text-fill-color: currentcolor;
-}

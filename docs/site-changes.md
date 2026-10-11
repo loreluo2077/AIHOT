@@ -763,6 +763,21 @@ loader、接口全留着）。首页 meta 与 `CARDS.fomo` 的文案同步去掉
   仍是它原来的纸面样子。若想让它改成深色赛博样式，改这一处即可。
 - 其余全部未动：症状清单、留言墙、feed、页尾、`site.ts` 的文案。上一批对 `site.ts`/`docs` 的改动已随
   还原撤销；`changelog.json` 只保留本批这一条新记录。
-- **补记（2026-10-12）**：使用者定下轮播底色为站点主色 `#176b75`（两种主题一致）：`.fomo-hero` 的
-  `background` 改为固定值，`--cyber-muted` 提亮到 `#d6e2e3` 保住正文对比度；`--cyber-bg` 保持深色，
-  因为黄色主按钮拿它当文字色。
+- **补记（2026-10-12，配色两改一定稿）**：先按使用者要求把轮播底色换成站点主色 `#176b75`，看过后否决；
+  最终定稿是**轮播直接用整站底色**：删掉 `.fomo-hero` 自己那套深色调色板（含暗色主题那段，以及
+  「纸面卡片落在深底上」的 `.fomo-hero .fomo-explainer` 作用域规则），让它落回上面 `.cyber` 的主题映射
+  （文字=ink、原来的黄=accent、青=accent-ink、品红=hot），只保留网格（3% accent 细网格）。
+  两个按钮同步弃用黄色：主按钮改 `bg-accent text-accent-contrast hover:bg-accent-ink`（去掉黄→品红
+  流光覆盖层与霓虹光晕），次按钮改站点描边样式（`border-line-strong text-accent`）。药丸形状、大写
+  字距、扫描线 / glitch hover 保留；轮播标题的 `leading-none` 放宽到 `leading-[1.08]`，让变长的标题
+  折行时不至于贴在一起。
+- **补记（2026-10-12，文案口语化）**：轮播四张、FOMO 解释、三种焦虑、症状清单、底部结语、留言表单、
+  留言示例与信息流全部重写：去掉英文代码标签（SIGNAL / STATUS / MOOD / TRUTH / SUBMIT / VOICES /
+  FOMO_FEED / MORE / NIGHT CITY）、金句式总结，以及没有出处的「扎心数据」（73%、52 个工具、347 个
+  必学、2.3 个 App 等——连 `扎心数据` 类型、`stat` 字段和那支渐变数字一起删掉），换成个人场景的自嘲。
+  留言只留「自嘲一下 / 真实经历」两类标签。未渲染的死代码（`FomoPoll`、`TodaySection`、`useCountUp`）
+  与自测题文案这次没动。
+- **补记（2026-10-12，图标）**：「三种底层焦虑」卡片上的 emoji 换成站点自己的线性图标
+  （`@aihot/web/components/icons` 的 `IconBolt / IconSparkles / IconClock`，走 `text-(--cyber-yellow)`，
+  即 accent），与模型榜等模块引用站点图标的方式一致。留言卡与心情选择的 emoji 属于读者自己选的内容，
+  这次没动。

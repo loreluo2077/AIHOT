@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { pageMeta } from "@aihot/web/lib/seo";
 import type { Screen } from "@aihot/web/components/shell/screens";
+import { IconBolt, IconClock, IconSparkles } from "@aihot/web/components/icons";
 import { FOMO } from "../config.ts";
 import type { FomoPayload } from "../types.ts";
 import "./cyber.css";
@@ -53,46 +54,36 @@ export async function loader(): Promise<Record<string, never>> {
 /** The four moments that trigger AI FOMO in an ordinary day. */
 const STIMULUS_CARDS = [
   {
-    badge: "📡 SIGNAL: 早上六点，新的又来了",
-    titleTop: "又一个",
+    badge: "一睁眼，又更新了",
+    titleTop: "又来了一个",
     subtitle: (
       <>
-        别慌，<span className='text-(--cyber-yellow)'>大家都一样</span>
+        昨天那个<span className='text-(--cyber-yellow)'>还没打开</span>
       </>
     ),
-    desc: (
-      <>
-        又发布了一个 AI 工具，我上一个还没注册完。
-        <br className='hidden md:block' />
-        不是不想学，是列表每天都在续杯。
-      </>
-    ),
+    desc: <>刚准备认真学一下，发现大家已经在讨论下一代了。</>,
   },
   {
-    badge: "😅 STATUS: 收藏夹正在成长",
-    titleTop: "收藏了",
-    subtitle: <span className='cyber-text-gradient-hot'>200 个教程</span>,
-    desc: <>我的进度：未开始。收藏不是学会，但那一刻确实很有安全感。</>,
+    badge: "收藏夹：一切尽在掌握",
+    titleTop: "收藏了 200 个教程",
+    subtitle: <span className='cyber-text-gradient-hot'>看完了两个标题</span>,
+    desc: <>先收藏，等有空再看。至于什么时候有空，暂时不清楚。</>,
   },
   {
-    badge: "🫠 MOOD: 想学习，先刷资讯",
-    titleTop: "刷了 3 小时",
+    badge: "本来只是随便看看",
+    titleTop: "刷了三小时 AI 新闻",
     subtitle: (
       <>
-        AI资讯，感觉自己<span className='text-(--cyber-cyan)'>更焦虑了</span>
+        正事<span className='text-(--cyber-cyan)'>一点没动</span>
       </>
     ),
-    desc: <>学会了 12 个新名词，唯一稳定更新的是：我又觉得自己该学点什么。</>,
+    desc: <>新名词记了一堆。电脑一关，还是不知道今天该学哪个。</>,
   },
   {
-    badge: "🤝 TRUTH: 大家都在假装跟上",
-    titleTop: "同事说",
-    subtitle: (
-      <>
-        <span className='text-(--cyber-cyan)'>五分钟</span>就搞定
-      </>
-    ),
-    desc: <>你点头说“挺好”，然后搜索：这个 AI 到底怎么用？</>,
+    badge: "同事说很简单",
+    titleTop: "“这个五分钟就能搞定”",
+    subtitle: <span className='text-(--cyber-cyan)'>我点了点头</span>,
+    desc: <>然后趁没人注意，搜了一遍这个东西到底是干什么的。</>,
   },
 ] as const;
 
@@ -309,7 +300,7 @@ function HeroSection(): ReactNode {
           className={`transition-all duration-300 ${transitioning ? "translate-y-4 scale-95 opacity-0" : "translate-y-0 scale-100 opacity-100"}`}
         >
           <h1
-            className={`cyber-display mb-6 text-5xl leading-none font-bold tracking-tight transition-all md:text-7xl ${glitchText ? "cyber-animate-glitch" : ""}`}
+            className={`cyber-display mb-6 text-5xl leading-[1.08] font-bold tracking-tight transition-all md:text-7xl ${glitchText ? "cyber-animate-glitch" : ""}`}
           >
             <span className='cyber-text-gradient cyber-animate-neon-flicker block'>
               {card.titleTop}
@@ -341,14 +332,13 @@ function HeroSection(): ReactNode {
           <button
             type='button'
             onClick={scrollToVoices}
-            className='cyber-scan-hover cyber-animate-pulse-glow group relative overflow-hidden rounded-full bg-(--cyber-yellow) px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-(--cyber-bg) transition-all hover:scale-105 hover:shadow-[0_0_30px_color-mix(in_srgb,var(--cyber-yellow)_50%,transparent),0_0_60px_color-mix(in_srgb,var(--cyber-yellow)_20%,transparent)]'
+            className='cyber-scan-hover rounded-full bg-accent px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-accent-contrast transition-all hover:scale-105 hover:bg-accent-ink'
           >
-            <span className='relative z-10'>看看大家怎么说 //</span>
-            <div className='animate-none absolute inset-0 bg-gradient-to-r from-(--cyber-yellow) via-(--cyber-magenta) to-(--cyber-yellow) bg-[length:200%_100%] opacity-0 transition-opacity group-hover:opacity-100 cyber-animate-border-flow' />
+            看看大家怎么说 //
           </button>
           <Link
             to='/fomo-test'
-            className='cyber-glitch-hover rounded-full border border-(--cyber-cyan)/50 px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-(--cyber-cyan) transition-all hover:scale-105 hover:border-(--cyber-cyan)/80 hover:bg-(--cyber-cyan)/10 hover:shadow-[0_0_20px_color-mix(in_srgb,var(--cyber-cyan)_40%,transparent),0_0_40px_color-mix(in_srgb,var(--cyber-cyan)_15%,transparent)]'
+            className='cyber-glitch-hover rounded-full border border-line-strong px-8 py-3 text-base font-bold tracking-[0.15em] uppercase text-accent transition-all hover:scale-105 hover:border-accent hover:bg-accent-soft'
           >
             测试 &gt;&gt;
           </Link>
@@ -411,7 +401,7 @@ function FomoExplainer(): ReactNode {
   return (
     <div className='fomo-explainer text-center'>
       <div className='mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)'>
-        EXPLAIN // 你不是落后，你只是被追着跑
+        EXPLAIN // 你也这样吗
       </div>
       <h2 className='cyber-display text-2xl font-bold md:text-4xl'>
         <span className='text-(--cyber-ink)'>什么是 </span>
@@ -419,14 +409,11 @@ function FomoExplainer(): ReactNode {
         <span className='text-(--cyber-ink)'> ？</span>
       </h2>
       <p className='mx-auto mt-4 max-w-xl text-sm leading-relaxed text-(--cyber-muted) md:text-base'>
-        AI FOMO，不只是怕错过一个工具。
+        大概就是：本来今天过得好好的，看了十分钟 AI 新闻，突然觉得自己什么都不会。
         <br />
-        它是你明明没有落后，却每天都觉得自己正在落后的感觉。
+        看到新工具想试，看到别人做出东西又着急。收藏越来越多，真正用起来的还是那几个。
         <br />
-        <span className='font-bold text-(--cyber-cyan)'>Fear Of Missing Out</span>{" "}
-        = 错失恐惧症
-        <br />
-        你以为自己在追赶机会，很多时候是在替自己的不安买单。
+        不是你真的落后了。只是每天都有人提醒你：还有新的东西没学。
       </p>
     </div>
   );
@@ -436,19 +423,19 @@ function FomoExplainer(): ReactNode {
 function WhatIsFOMO(): ReactNode {
   const anxieties = [
     {
-      emoji: "⚡",
+      icon: IconBolt,
       title: "能力焦虑",
-      text: "别人已经会了，我还不会。是不是说明我已经落后了一步？",
+      text: "别人都开始分享心得了，我还在找注册入口。",
     },
     {
-      emoji: "🫥",
+      icon: IconSparkles,
       title: "价值焦虑",
-      text: "如果 AI 能做越来越多的事，那我现在会的这些，还有多少价值？",
+      text: "AI 又会了一项。很好，我又少了一项可以自我介绍的技能。",
     },
     {
-      emoji: "🚪",
+      icon: IconClock,
       title: "机会焦虑",
-      text: "如果我现在不开始，下一波机会是不是就和我没关系了？",
+      text: "也不知道是什么机会，反正看起来再不行动就要错过了。",
     },
   ] as const;
 
@@ -467,24 +454,25 @@ function WhatIsFOMO(): ReactNode {
             三种底层焦虑 // 你到底在怕什么？
           </div>
           <div className='grid gap-3 md:grid-cols-3'>
-            {anxieties.map((anxiety) => (
+            {anxieties.map(({ icon: Icon, title, text }) => (
               <div
-                key={anxiety.title}
+                key={title}
                 className='cyber-panel cyber-hover-yellow p-5'
               >
-                <div className='mb-3 text-2xl'>{anxiety.emoji}</div>
+                <div className='mb-3 text-(--cyber-yellow)'>
+                  <Icon size={20} />
+                </div>
                 <h3 className='mb-2 text-base font-bold text-(--cyber-ink)'>
-                  {anxiety.title}
+                  {title}
                 </h3>
                 <p className='text-sm leading-relaxed text-(--cyber-muted)'>
-                  {anxiety.text}
+                  {text}
                 </p>
               </div>
             ))}
           </div>
           <p className='mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-(--cyber-muted)'>
-            所以我们不断收藏、安装、报名、研究，有时候不是因为真的需要，
-            而是在给自己的不安找一个看起来很积极的出口。
+            于是先收藏、先安装、先报名。事情有没有开始不重要，至少刚才那几分钟没那么慌了。
           </p>
         </div>
 
@@ -494,12 +482,12 @@ function WhatIsFOMO(): ReactNode {
           </div>
           <div className='grid gap-3'>
             {[
-              "早上还没刷牙，先看到别人用 AI 三天做出一个产品。",
-              "明明手边的工具用得好好的，还是忍不住安装新的。",
-              "收藏了 400 个‘以后一定看’的链接，真正打开的不超过 5 个。",
-              "本来有项目要做，先花两个小时研究新工具。",
-              "同时学三种 AI 工具，最后哪个都没真正用起来。",
-              "看到‘AI 将取代你’，手指比脑子更快地点开。",
+              "早上还没起床，先看到别人用 AI 做完了一个产品。",
+              "手里的工具明明够用，还是顺手把新的也注册了。",
+              "收藏夹里全是「周末看」，但每个周末都有新的要收藏。",
+              "本来准备干活，结果先研究了两个小时该用什么工具干活。",
+              "同时开了三个教程，最后只学会了怎么切标签页。",
+              "看到「这几个岗位要消失了」，明知道标题很夸张，还是点了进去。",
             ].map((symptom) => (
               <div
                 key={symptom}
@@ -514,11 +502,11 @@ function WhatIsFOMO(): ReactNode {
         <div className='text-center'>
           <div className='inline-block rounded-tile border border-(--cyber-cyan)/30 bg-(--cyber-cyan)/5 px-5 py-3'>
             <p className='text-sm leading-relaxed text-(--cyber-ink)'>
-              这个时代，我们都在被变化推着走。
+              来这里不是劝你再学十个工具。
               <br className='hidden md:block' />
-              来这里不是为了更焦虑，而是——
+              只是想提醒一句：
               <span className='font-bold text-(--cyber-yellow)'>
-                为了消解掉这种焦虑
+                今天真正用得上的，学一个就够了
               </span>
             </p>
           </div>
@@ -675,32 +663,32 @@ function timeAgo(iso: string): string {
 
 const DEFAULT_VOICES = [
   {
-    text: "又有新AI工具了，我连上一个的注册流程都没走完",
+    text: "又出了个新工具。我点进去看了一眼，发现上一个账号都还没注册完。",
     mood: "😅",
     time: "3m",
   },
   {
-    text: "老板说要拥抱AI，然后发了个全英文教程链接。谢谢老板。",
+    text: "老板在群里发了篇全英文教程，说大家有空学习一下。群里目前非常安静。",
     mood: "🫠",
     time: "12m",
   },
   {
-    text: "我妈问我ChatGPT能不能帮她炒股。我说能。其实我也不知道。",
+    text: "我妈问 ChatGPT 能不能帮她炒股。我说不能全信。其实这话也是我刚搜到的。",
     mood: "😂",
     time: "28m",
   },
   {
-    text: "收藏了一个「7天精通AI」的课程。今天是第47天。",
+    text: "收藏了一个「7 天学会 AI」的课程。今天是第 47 天，第一课还没看完。",
     mood: "🥲",
     time: "1h",
   },
   {
-    text: "看到00后用AI做了个App月入过万，我默默关掉了手机",
+    text: "同事用 AI 十分钟写完周报。我花了半小时研究他到底用了哪个提示词。",
     mood: "😮‍💨",
     time: "2h",
   },
   {
-    text: "在公司AI分享会上点头如捣蒜，其实一个字没听懂",
+    text: "公司开 AI 分享会，我全程点头。散会以后第一件事，是搜刚才那些词怎么念。",
     mood: "🤡",
     time: "3h",
   },
@@ -711,14 +699,9 @@ const FEED_TYPES = {
   自嘲吐槽: {
     border: "border-l-(--cyber-yellow)/60",
     icon: "😅",
-    label: "MOOD",
+    label: "自嘲一下",
   },
-  真实故事: { border: "border-l-(--cyber-cyan)/60", icon: "📡", label: "REAL" },
-  扎心数据: {
-    border: "border-l-(--cyber-magenta)/60",
-    icon: "📊",
-    label: "DATA",
-  },
+  真实故事: { border: "border-l-(--cyber-cyan)/60", icon: "📡", label: "真实经历" },
 } as const;
 type FeedType = keyof typeof FEED_TYPES;
 
@@ -726,7 +709,6 @@ interface FeedItem {
   id: string;
   type: FeedType;
   content: string;
-  stat?: string;
   source?: string;
   at: number;
 }
@@ -743,48 +725,42 @@ const FEED_ITEMS: FeedItem[] = [
     id: "fomo-symptom-1",
     type: "自嘲吐槽",
     content:
-      "早上还没刷牙，先看到别人用 AI 三天做出一个产品。今天的落后感来得很准时。",
+      "早上还没起床，先看到别人用 AI 做完了一个产品。今天的落后感来得很准时。",
     at: Date.now() - HOUR * 7,
   },
   {
     id: "fomo-symptom-2",
     type: "自嘲吐槽",
     content:
-      "手边的工具明明用得好好的，看到一个更厉害的，还是忍不住先装上再说。",
+      "手里的工具明明够用，还是顺手把新的也注册了。就当是留条后路。",
     at: Date.now() - HOUR * 8,
   },
   {
     id: "fomo-symptom-3",
     type: "自嘲吐槽",
     content:
-      "收藏夹里有 400 个‘以后一定看’的链接，真正打开过的，可能还不到 5 个。",
+      "收藏夹里全是「周末看」，但每个周末都有新的要收藏。周末本身一直没到。",
     at: Date.now() - HOUR * 9,
   },
   {
     id: "fomo-symptom-4",
     type: "自嘲吐槽",
     content:
-      "本来有项目要做，先花两个小时研究新工具。研究完了，项目还是没开始。",
+      "本来准备干活，结果先研究了两个小时该用什么工具干活。后来活没干成。",
     at: Date.now() - HOUR * 10,
   },
   {
     id: "fomo-symptom-5",
     type: "自嘲吐槽",
     content:
-      "同时学三种 AI 工具，最后哪个都没真正用起来，但每个都觉得自己差一点就学会了。",
+      "同时开了三个教程，最后只学会了怎么切标签页。也算熟练了一项技能。",
     at: Date.now() - HOUR * 11,
   },
   {
     id: "fomo-symptom-6",
     type: "自嘲吐槽",
-    content: "看到‘AI 将取代你’，手指比脑子更快地点开。看完以后，决定先收藏。",
+    content: "看到「这几个岗位要消失了」，明知道标题很夸张，还是点了进去。",
     at: Date.now() - HOUR * 12,
-  },
-  {
-    id: "ff1",
-    type: "自嘲吐槽",
-    content: "又有一个AI工具火了。我连上一个还没注册完。",
-    at: Date.now() - HOUR * 1,
   },
   {
     id: "ff2",
@@ -796,9 +772,8 @@ const FEED_ITEMS: FeedItem[] = [
   },
   {
     id: "ff3",
-    type: "扎心数据",
-    content: "调查显示，73%的人表示「我知道该学AI」，但只有12%真的开始了。",
-    stat: "73%",
+    type: "自嘲吐槽",
+    content: "装了五个 AI App。真正会主动打开的，还是最开始那个聊天框。",
     at: Date.now() - HOUR * 3,
   },
   {
@@ -818,9 +793,8 @@ const FEED_ITEMS: FeedItem[] = [
   },
   {
     id: "ff6",
-    type: "扎心数据",
-    content: "过去一周，全球新上线了52个AI工具。你安装了几个？",
-    stat: "52",
+    type: "自嘲吐槽",
+    content: "关注的博主每天都在推荐「必学工具」。我目前最熟练的操作是点收藏。",
     at: Date.now() - HOUR * 6,
   },
   {
@@ -840,18 +814,16 @@ const FEED_ITEMS: FeedItem[] = [
   },
   {
     id: "ff9",
-    type: "扎心数据",
+    type: "自嘲吐槽",
     content:
-      "你关注的AI博主今年已经推荐了347个「必学工具」。一天一个都学不完。",
-    stat: "347",
+      "每次看到「人人都该学 AI」，我都会认真焦虑一下，然后继续处理今天的工作。",
     at: Date.now() - HOUR * 9,
   },
 
   {
     id: "ff12",
-    type: "扎心数据",
-    content: "平均每个人手机里有2.3个AI App，月均使用次数：1.7次。",
-    stat: "1.7",
+    type: "自嘲吐槽",
+    content: "最费时间的不是学工具，是研究到底应该学哪个工具。",
     at: Date.now() - HOUR * 12,
   },
 
@@ -889,7 +861,7 @@ function SubmitVoiceForm({
         { content: trimmed, mood, created_at: new Date().toISOString() },
         ...readVoices(),
       ]);
-      setMessage("已发布（只存在这台浏览器里）");
+      setMessage("记下来了，只存在你的浏览器里");
       setContent("");
       setMood("😅");
       onSubmitted();
@@ -901,19 +873,19 @@ function SubmitVoiceForm({
   return (
     <div className='cyber-panel mb-6 flex flex-col gap-3 p-4'>
       <div className='mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)'>
-        SUBMIT // SHARE YOUR STORY
+        说说你今天又被什么刺激到了
       </div>
       <textarea
         value={content}
         onChange={(event) => setContent(event.target.value)}
         maxLength={200}
         rows={2}
-        placeholder='你的 AI 焦虑时刻（最多 200 字，只保存在本机）'
+        placeholder='比如：刚学会一个，群里又开始聊下一个了……'
         className='w-full resize-none rounded-control border border-(--cyber-line)/50 bg-(--cyber-bg)/30 px-3 py-2 text-sm text-(--cyber-ink) outline-none transition-colors placeholder:text-(--cyber-muted)/50 focus:border-(--cyber-yellow)/50'
       />
       <div className='flex flex-wrap items-center gap-1.5'>
         <span className='mono mr-1 text-[10px] text-(--cyber-muted)'>
-          mood:
+          此刻心情
         </span>
         {MOOD_OPTIONS.map((m) => (
           <button
@@ -937,12 +909,15 @@ function SubmitVoiceForm({
           disabled={!content.trim()}
           className='rounded-control border border-(--cyber-yellow)/40 bg-(--cyber-yellow)/10 px-5 py-2 text-xs tracking-wider uppercase text-(--cyber-yellow) transition-all hover:bg-(--cyber-yellow)/20 disabled:cursor-not-allowed disabled:opacity-40'
         >
-          SUBMIT
+          留在这里
         </button>
       </div>
       {message ? (
         <p className='text-xs text-(--cyber-muted)'>{message}</p>
       ) : null}
+      <p className='text-[10px] leading-relaxed text-(--cyber-muted)/60'>
+        只有你自己看得到。刷新不会丢，换设备就没有了。
+      </p>
     </div>
   );
 }
@@ -970,11 +945,6 @@ function FeedCard({ item }: { item: FeedItem }): ReactNode {
         </span>
       </div>
       <p className='text-sm leading-relaxed text-(--cyber-ink) transition-colors group-hover:text-(--cyber-yellow) md:text-base'>
-        {item.type === "扎心数据" && item.stat ? (
-          <span className='cyber-display cyber-text-gradient mr-2 text-2xl font-bold md:text-3xl'>
-            {item.stat}
-          </span>
-        ) : null}
         {item.content}
       </p>
     </div>
@@ -1004,7 +974,7 @@ function FomoFeed(): ReactNode {
       <div className='mx-auto max-w-3xl'>
         <div className='mb-8 text-center'>
           <div className='mono mb-2 text-[10px] tracking-widest uppercase text-(--cyber-muted)'>
-            VOICES // 大家都在说什么
+            大家都在说什么
           </div>
           <h2 className='cyber-display text-2xl font-bold md:text-3xl'>
             <span className='cyber-text-gradient'>别憋着，说出来</span>
@@ -1016,7 +986,7 @@ function FomoFeed(): ReactNode {
         <div className='mb-6 flex items-center gap-3' aria-hidden>
           <div className='h-px flex-1 bg-(--cyber-line)' />
           <span className='mono text-[10px] tracking-widest text-(--cyber-muted)'>
-            FOMO_FEED
+            更多留言
           </span>
           <div className='h-px flex-1 bg-(--cyber-line)' />
         </div>
@@ -1034,7 +1004,7 @@ function FomoFeed(): ReactNode {
               onClick={() => setCount((c) => c + 5)}
               className='cyber-animate-pulse-glow rounded-full border border-(--cyber-yellow)/40 px-8 py-2.5 text-xs tracking-wider uppercase text-(--cyber-yellow) transition-all hover:bg-(--cyber-yellow)/10'
             >
-              MORE
+              再看几条
             </button>
           </div>
         ) : null}
@@ -1057,7 +1027,7 @@ export default function FomoPage(): ReactNode {
       <section className='px-4 py-16'>
         <div className='mx-auto max-w-4xl text-center'>
           <div className='mono text-[10px] tracking-[0.3em] text-(--cyber-muted)/40'>
-            NIGHT CITY // AI FOMO SYSTEM v2077 // {new Date().getFullYear()}
+            别全追。挑一个真的用起来。
           </div>
           <div className='mt-4 flex items-center justify-center gap-4 text-xs text-(--cyber-muted)'>
             <Link
