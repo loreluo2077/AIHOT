@@ -277,42 +277,13 @@
   animation: none;
 }
 
-/* The first screen is the page's signature moment. It intentionally keeps the dark instrument-panel
-   treatment in both reader themes; the editorial sections below it continue to follow the site theme. */
-.fomo-hero {
-  /* In light mode, use the main dark palette's raised surface instead of its deepest page ground:
-     the hero remains a distinct moment without reading as a hard black interruption. */
-  --cyber-bg: #202a2f;
-  --cyber-panel: #263238;
-  --cyber-line: rgba(255, 255, 255, 0.08);
-  --cyber-ink: #e7eceb;
-  --cyber-muted: #89979d;
-  --cyber-yellow: #f5d90a;
-  --cyber-cyan: #00dcf0;
-  --cyber-magenta: #ff2ba6;
-  background: var(--cyber-bg);
-  color: var(--cyber-ink);
-}
-
+/* The first screen now sits on the site's own paper ground: the owner retired the dark panel (and
+   the teal experiment after it), so the hero needs no palette of its own — the theme mapping above
+   already routes every --cyber-* token to the site's ink and accent. Only its grid stays switched
+   on, as a whisper of accent over the paper. */
 .fomo-hero .cyber-grid-bg {
   display: block;
   opacity: 0.7;
-}
-
-.fomo-hero .cyber-text-gradient {
-  background: linear-gradient(135deg, var(--cyber-yellow), var(--cyber-cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: inherit;
-}
-
-.fomo-hero .cyber-animate-pulse-glow {
-  animation: cyber-pulse-glow 2s ease-in-out infinite;
-}
-
-.fomo-hero .cyber-animate-neon-flicker {
-  animation: cyber-neon-flicker 3s ease-in-out infinite;
 }
 
 /* The definition is the page's emotional anchor. Give it a distinct but editorial card treatment so
@@ -357,4 +328,20 @@
   --cyber-bg: #13191c;
   --cyber-panel: #1a2226;
   --cyber-yellow: #f2cd45;
+}
+
+/* Wide screens seat the definition card inside the hero band (fomo.tsx). Its paper colours must not
+   dissolve into the dark ground, so its own --cyber-* text tokens are re-anchored to the theme's
+   paper ones, its ground becomes solid surface, and the neon gradient the hero re-enables for
+   .cyber-text-gradient is switched back off inside the card. Phones keep the card on paper below. */
+.fomo-hero .fomo-explainer {
+  --cyber-ink: var(--ink);
+  --cyber-muted: var(--ink-3);
+  --cyber-cyan: var(--accent);
+  background: var(--surface);
+}
+
+.fomo-hero .fomo-explainer .cyber-text-gradient {
+  background: none;
+  -webkit-text-fill-color: currentcolor;
 }

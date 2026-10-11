@@ -267,7 +267,7 @@ function HeroSection(): ReactNode {
   };
 
   return (
-    <section className='fomo-hero relative flex min-h-[calc(100dvh-120px)] items-center justify-center overflow-hidden'>
+    <section className='fomo-hero relative flex min-h-[calc(100dvh-120px)] items-center justify-center overflow-hidden xl:grid xl:min-h-[min(620px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10'>
       <div className='cyber-grid-bg absolute inset-0 opacity-60' aria-hidden />
       <Link
         to='/'
@@ -365,6 +365,12 @@ function HeroSection(): ReactNode {
           <div className='h-px w-20 bg-gradient-to-l from-transparent to-(--cyber-cyan)/40' />
         </div>
       </div>
+
+      {/* Wide screens seat the definition beside the carousel (FomoExplainer below); phones keep the
+          original full-height hero with the definition underneath it. */}
+      <aside className='relative z-10 hidden px-4 xl:block'>
+        <FomoExplainer />
+      </aside>
     </section>
   );
 }
@@ -399,6 +405,33 @@ function SectionDivider({
   );
 }
 
+/** The definition card: on wide screens it sits inside the hero beside the carousel; on phones it
+ *  stays at the top of the explanation below. Same card, two seats, never both at once. */
+function FomoExplainer(): ReactNode {
+  return (
+    <div className='fomo-explainer text-center'>
+      <div className='mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)'>
+        EXPLAIN // 你不是落后，你只是被追着跑
+      </div>
+      <h2 className='cyber-display text-2xl font-bold md:text-4xl'>
+        <span className='text-(--cyber-ink)'>什么是 </span>
+        <span className='cyber-text-gradient'>AI FOMO</span>
+        <span className='text-(--cyber-ink)'> ？</span>
+      </h2>
+      <p className='mx-auto mt-4 max-w-xl text-sm leading-relaxed text-(--cyber-muted) md:text-base'>
+        AI FOMO，不只是怕错过一个工具。
+        <br />
+        它是你明明没有落后，却每天都觉得自己正在落后的感觉。
+        <br />
+        <span className='font-bold text-(--cyber-cyan)'>Fear Of Missing Out</span>{" "}
+        = 错失恐惧症
+        <br />
+        你以为自己在追赶机会，很多时候是在替自己的不安买单。
+      </p>
+    </div>
+  );
+}
+
 /** The explanation: what AI FOMO is, the moments everyone knows, and the reassurance. */
 function WhatIsFOMO(): ReactNode {
   const anxieties = [
@@ -423,27 +456,10 @@ function WhatIsFOMO(): ReactNode {
     <section className='px-4 py-16 md:py-24'>
       <div className='mx-auto max-w-5xl lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-12'>
         <div>
-        <div className='fomo-explainer mb-10 text-center'>
-          <div className='mono mb-3 text-[10px] tracking-widest uppercase text-(--cyber-muted)'>
-            EXPLAIN // 你不是落后，你只是被追着跑
-          </div>
-          <h2 className='cyber-display text-2xl font-bold md:text-4xl'>
-            <span className='text-(--cyber-ink)'>什么是 </span>
-            <span className='cyber-text-gradient'>AI FOMO</span>
-            <span className='text-(--cyber-ink)'> ？</span>
-          </h2>
-          <p className='mx-auto mt-4 max-w-xl text-sm leading-relaxed text-(--cyber-muted) md:text-base'>
-            AI FOMO，不只是怕错过一个工具。
-            <br />
-            它是你明明没有落后，却每天都觉得自己正在落后的感觉。
-            <br />
-            <span className='font-bold text-(--cyber-cyan)'>
-              Fear Of Missing Out
-            </span>{" "}
-            = 错失恐惧症
-            <br />
-            你以为自己在追赶机会，很多时候是在替自己的不安买单。
-          </p>
+        {/* Phones keep the definition here at the top of the explanation; wide screens seat it
+            inside the hero instead (see FomoExplainer). */}
+        <div className='mb-10 xl:hidden'>
+          <FomoExplainer />
         </div>
 
         <div className='mb-10'>
