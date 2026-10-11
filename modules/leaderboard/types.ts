@@ -60,13 +60,26 @@ export interface BenchmarkRow {
   model: string;
   overall: number | null;
   scores: Record<string, number>;
+  /** How many of the benchmark's ability categories this model has scores for, and how many there are. */
+  covered: number;
+  total: number;
   /** The entry this row was matched to in the catalogue; null when nothing matched it. */
   catalogueName: string | null;
+  vendor: string | null;
   releasedAt: string | null;
   priceIn: number | null;
   priceOut: number | null;
   modality: string | null;
   url: string | null;
+}
+
+/** A model with a score but too narrow a coverage to rank honestly. */
+export interface WatchlistRow {
+  modelKey: string;
+  model: string;
+  overall: number | null;
+  covered: number;
+  total: number;
 }
 
 export interface BenchmarkView {
@@ -77,6 +90,8 @@ export interface BenchmarkView {
   snapshot: string | null;
   columns: BenchmarkColumn[];
   rows: BenchmarkRow[];
+  /** Models with a score whose category coverage is too narrow to rank. */
+  watchlist: WatchlistRow[];
   /** How many rows a catalogue entry was found for. */
   matched: number;
 }

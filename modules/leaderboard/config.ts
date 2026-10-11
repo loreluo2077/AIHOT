@@ -33,6 +33,13 @@ export const LEADERBOARD = {
   modelAliases: {} as Record<string, string>,
   /** A metric needs this many models behind it to be shown at all. */
   minModelsPerMetric: 5,
+  /**
+   * A model needs scores for at least this share of the benchmark's ability categories to hold a rank;
+   * narrower ones sit in the watchlist until their coverage fills in.
+   */
+  minCoverageForRanking: 0.5,
+  /** How many models the watchlist lists at most. */
+  watchlistRows: 8,
   /** First-party benchmark tables: a published CSV of scores. */
   livebench: {
     enabled: true,

@@ -129,6 +129,42 @@ test("the catalogue's release date and price land on the benchmark's rows by nam
   assert.equal(benchmark!.rows[2]!.catalogueName, null);
 });
 
+test("a model whose coverage is too narrow waits in the watchlist instead of ranking", async () => {
+  const source = `${T}-narrow`;
+  await storeSource({
+    key: source,
+    label: "测试基准",
+    url: "https://benchmark.example",
+    licence: "",
+    snapshot: null,
+    models: [],
+    scores: [
+      // 三类能力各有五个模型（满足 minModelsPerMetric），另有一个只测过其中一类的模型。
+      ...[0, 1, 2, 3, 4].flatMap((index) => [
+        { modelKey: `${T}full-${index}`, modelLabel: `${T}full-${index}`, metricKey: "task-a", metricLabel: "task-a", metricGroup: "推理", value: 80 - index },
+        { modelKey: `${T}full-${index}`, modelLabel: `${T}full-${index}`, metricKey: "task-b", metricLabel: "task-b", metricGroup: "编程", value: 70 - index },
+        { modelKey: `${T}full-${index}`, modelLabel: `${T}full-${index}`, metricKey: "task-c", metricLabel: "task-c", metricGroup: "数学", value: 60 - index },
+        { modelKey: `${T}full-${index}`, modelLabel: `${T}full-${index}`, metricKey: "overall", metricLabel: "综合", metricGroup: "总体", value: 70 - index, isOverall: true },
+      ]),
+      { modelKey: `${T}narrow`, modelLabel: `${T}narrow`, metricKey: "task-a", metricLabel: "task-a", metricGroup: "推理", value: 90 },
+      { modelKey: `${T}narrow`, modelLabel: `${T}narrow`, metricKey: "overall", metricLabel: "综合", metricGroup: "总体", value: 90, isOverall: true },
+    ],
+  });
+
+  const benchmark = (await leaderboardPayload()).benchmark;
+  assert.ok(benchmark, "the source drives the main table");
+  assert.deepEqual([...benchmark!.columns.map((column) => column.label)].sort(), ["编程", "数学", "综合", "推理"].sort());
+  assert.equal(benchmark!.rows.some((row) => row.modelKey === `${T}narrow`), false, "the narrow model holds no rank");
+  assert.equal(benchmark!.rows[0]!.rank, 1);
+  assert.equal(benchmark!.rows[0]!.covered, 3, "a fully measured model keeps its coverage counts");
+  assert.equal(benchmark!.rows[0]!.total, 3);
+  const watched = benchmark!.watchlist.find((row) => row.modelKey === `${T}narrow`);
+  assert.ok(watched, "it waits in the watchlist instead");
+  assert.equal(watched!.covered, 1);
+  assert.equal(watched!.total, 3);
+  assert.equal(watched!.overall, 90, "its score is kept, just not ranked");
+});
+
 test("a catalogue row keeps what an earlier source knew, and a failure keeps the last good ranking", async () => {
   const key = `${T}-model`;
   await storeSource({

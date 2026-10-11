@@ -4,7 +4,7 @@
 import { sql, type Db } from "@aihot/backend/db";
 import { LEADERBOARD } from "../config.ts";
 import { matchCatalogue, matchIndex, type CatalogueEntry } from "./match.ts";
-import type { BenchmarkColumn, BenchmarkRow, BenchmarkView, BenchmarkTable, CatalogueRow, LeaderboardPayload, RankedRow, SourceView } from "../types.ts";
+import type { BenchmarkColumn, BenchmarkRow, BenchmarkView, BenchmarkTable, CatalogueRow, LeaderboardPayload, RankedRow, SourceView, WatchlistRow } from "../types.ts";
 
 interface ScoreRow {
   source_key: string;
@@ -133,26 +133,52 @@ function buildBenchmark(
   }
 
   let matched = 0;
-  const rows: BenchmarkRow[] = overall.slice(0, LEADERBOARD.rowsPerMetric).map((row, position) => {
+  const abilityColumns = columns.filter((column) => !column.overall);
+  const coveredOf = (modelKey: string): number => {
+    const values = groupOf.get(modelKey);
+    if (!values) return 0;
+    let covered = 0;
+    for (const column of abilityColumns) if (values.has(column.group)) covered++;
+    return covered;
+  };
+  const join = (row: ScoreRow): BenchmarkRow => {
     const entry = matchCatalogue(row.model_key, index, LEADERBOARD.modelAliases);
     const catalogueRow = entry ? byKey.get(entry.key) : undefined;
-    if (catalogueRow) matched++;
     const scores: Record<string, number> = {};
     const values = groupOf.get(row.model_key);
     if (values) for (const [group, value] of values) scores[`group:${group}`] = Math.round(value * 100) / 100;
     return {
-      rank: position + 1,
+      rank: 0,
       modelKey: row.model_key,
       model: row.model_label,
       overall: Math.round(Number(row.value) * 100) / 100,
       scores,
+      covered: coveredOf(row.model_key),
+      total: abilityColumns.length,
       catalogueName: catalogueRow?.name ?? null,
+      vendor: catalogueRow?.vendor ?? null,
       releasedAt: catalogueRow?.releasedAt ?? null,
       priceIn: catalogueRow?.priceIn ?? null,
       priceOut: catalogueRow?.priceOut ?? null,
       modality: catalogueRow?.modality ?? null,
       url: catalogueRow?.url ?? null,
     };
+  };
+
+  // The ranking holds the models whose coverage is broad enough to compare; the rest keep their score
+  // in the watchlist until the benchmark measures more of their categories.
+  const ranked: BenchmarkRow[] = [];
+  const watchlist: WatchlistRow[] = [];
+  for (const row of overall) {
+    const covered = coveredOf(row.model_key);
+    const qualifies = abilityColumns.length === 0 || covered / abilityColumns.length >= LEADERBOARD.minCoverageForRanking;
+    if (qualifies) ranked.push(join(row));
+    else if (watchlist.length < LEADERBOARD.watchlistRows)
+      watchlist.push({ modelKey: row.model_key, model: row.model_label, overall: Math.round(Number(row.value) * 100) / 100, covered, total: abilityColumns.length });
+  }
+  const rows = ranked.slice(0, LEADERBOARD.rowsPerMetric).map((row, position) => {
+    if (row.catalogueName) matched++;
+    return { ...row, rank: position + 1 };
   });
 
   return {
@@ -163,6 +189,7 @@ function buildBenchmark(
     snapshot: source?.snapshot ?? null,
     columns,
     rows,
+    watchlist,
     matched,
   };
 }
