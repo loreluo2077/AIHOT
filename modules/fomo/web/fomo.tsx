@@ -55,7 +55,7 @@ export async function loader(): Promise<Record<string, never>> {
 const STIMULUS_CARDS = [
   {
     badge: "一睁眼，又更新了",
-    titleTop: "又来了一个",
+    titleTop: "又来了一个新工具",
     subtitle: (
       <>
         昨天那个<span className='text-(--cyber-yellow)'>还没打开</span>
@@ -258,7 +258,7 @@ function HeroSection(): ReactNode {
   };
 
   return (
-    <section className='fomo-hero relative flex items-center justify-center overflow-hidden py-16 sm:py-20 xl:grid xl:min-h-[min(620px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10 xl:py-0'>
+    <section className='fomo-hero relative flex items-center justify-center overflow-hidden py-10 sm:py-12 xl:grid xl:min-h-[min(480px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10 xl:py-0'>
       <div className='cyber-grid-bg absolute inset-0 opacity-60' aria-hidden />
       <Link
         to='/'
@@ -345,7 +345,7 @@ function HeroSection(): ReactNode {
         </div>
 
         <div
-          className='mt-10 flex items-center justify-center gap-3 xl:mt-16'
+          className='mt-8 flex items-center justify-center gap-3 xl:mt-8'
           aria-hidden
         >
           <div className='h-px w-20 bg-gradient-to-r from-transparent to-(--cyber-yellow)/40' />
