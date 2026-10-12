@@ -781,6 +781,10 @@ loader、接口全留着）。首页 meta 与 `CARDS.fomo` 的文案同步去掉
   （`@aihot/web/components/icons` 的 `IconBolt / IconSparkles / IconClock`，走 `text-(--cyber-yellow)`，
   即 accent），与模型榜等模块引用站点图标的方式一致。留言卡与心情选择的 emoji 属于读者自己选的内容，
   这次没动。
+- **补记（2026-10-12，移动端收紧）**：手机上首屏不再撑满一整屏——去掉 `100dvh` 的 `min-h`，改为内容
+  高度加 `py-16 sm:py-20`（桌面 `xl:` 仍是 620px 双栏、`xl:py-0`）；两个按钮在窄屏并排（`flex-wrap`）；
+  首屏底部装饰线间距收紧（`mt-10 xl:mt-16`）；首屏与解释区之间的 SectionDivider 按使用者要求去掉
+  （留言区、页尾前那两条分隔线保留）。手机实测首屏高度 805px → 约 507px。
 
 ## 18. 关于页文案调整（2026-10-12）
 

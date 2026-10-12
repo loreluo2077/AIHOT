@@ -258,7 +258,7 @@ function HeroSection(): ReactNode {
   };
 
   return (
-    <section className='fomo-hero relative flex min-h-[calc(100dvh-120px)] items-center justify-center overflow-hidden xl:grid xl:min-h-[min(620px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10'>
+    <section className='fomo-hero relative flex items-center justify-center overflow-hidden py-16 sm:py-20 xl:grid xl:min-h-[min(620px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10 xl:py-0'>
       <div className='cyber-grid-bg absolute inset-0 opacity-60' aria-hidden />
       <Link
         to='/'
@@ -328,7 +328,7 @@ function HeroSection(): ReactNode {
         </div>
 
         {/* The two doors: the voices wall below, and the merged self-test. */}
-        <div className='flex flex-col items-center justify-center gap-4 sm:flex-row'>
+        <div className='flex flex-wrap items-center justify-center gap-4'>
           <button
             type='button'
             onClick={scrollToVoices}
@@ -345,7 +345,7 @@ function HeroSection(): ReactNode {
         </div>
 
         <div
-          className='mt-16 flex items-center justify-center gap-3'
+          className='mt-10 flex items-center justify-center gap-3 xl:mt-16'
           aria-hidden
         >
           <div className='h-px w-20 bg-gradient-to-r from-transparent to-(--cyber-yellow)/40' />
@@ -1017,7 +1017,6 @@ export default function FomoPage(): ReactNode {
   return (
     <div className='cyber mx-auto mb-14 w-full max-w-[var(--page-max-reading)] lg:mt-3'>
       <HeroSection />
-      <SectionDivider variant='yellow' />
       <WhatIsFOMO />
       <SectionDivider variant='cyan' />
       <FomoFeed />
