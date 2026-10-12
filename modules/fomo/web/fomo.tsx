@@ -258,7 +258,7 @@ function HeroSection(): ReactNode {
   };
 
   return (
-    <section className='fomo-hero relative flex items-center justify-center overflow-hidden py-10 sm:py-12 xl:grid xl:min-h-[min(480px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10 xl:py-0'>
+    <section className='fomo-hero relative flex items-center justify-center overflow-hidden py-6 sm:py-12 xl:grid xl:min-h-[min(480px,calc(100dvh-120px))] xl:grid-cols-[1.15fr_0.85fr] xl:gap-10 xl:py-0'>
       <div className='cyber-grid-bg absolute inset-0 opacity-60' aria-hidden />
       <Link
         to='/'
@@ -285,7 +285,7 @@ function HeroSection(): ReactNode {
       <div className='relative z-10 mx-auto max-w-5xl px-4 text-center'>
         {/* The warning badge the card wears. */}
         <div
-          className={`mono mb-8 inline-flex items-center gap-2 rounded-full border border-(--cyber-yellow)/60 bg-(--cyber-yellow)/10 px-4 py-1.5 text-xs tracking-widest uppercase text-(--cyber-yellow) transition-all duration-500 ${
+          className={`mono mb-6 inline-flex items-center gap-2 rounded-full border border-(--cyber-yellow)/60 bg-(--cyber-yellow)/10 px-4 py-1.5 text-xs tracking-widest uppercase text-(--cyber-yellow) transition-all duration-500 sm:mb-8 ${
             showWarning
               ? "translate-y-0 opacity-100"
               : "-translate-y-4 opacity-0"
@@ -309,13 +309,13 @@ function HeroSection(): ReactNode {
               {card.subtitle}
             </span>
           </h1>
-          <p className='mx-auto mb-10 max-w-2xl text-sm leading-relaxed text-(--cyber-muted) md:text-base'>
+          <p className='mx-auto mb-6 max-w-2xl text-sm leading-relaxed text-(--cyber-muted) sm:mb-10 md:text-base'>
             {card.desc}
           </p>
         </div>
 
         {/* The card indicators. */}
-        <div className='mb-8 flex items-center justify-center gap-2'>
+        <div className='mb-6 flex items-center justify-center gap-2 sm:mb-8'>
           {STIMULUS_CARDS.map((_, i) => (
             <button
               key={i}
@@ -345,7 +345,7 @@ function HeroSection(): ReactNode {
         </div>
 
         <div
-          className='mt-8 flex items-center justify-center gap-3 xl:mt-8'
+          className='mt-4 flex items-center justify-center gap-3 sm:mt-8'
           aria-hidden
         >
           <div className='h-px w-20 bg-gradient-to-r from-transparent to-(--cyber-yellow)/40' />
